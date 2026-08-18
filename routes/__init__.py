@@ -22,6 +22,8 @@ from routes.issues import issues_bp
 from routes.documents import documents_bp
 from routes.notifications import notifications_bp
 from routes.reports import reports_bp
+from routes.clients import clients_bp
+from routes.project_managers import project_managers_bp
 
 def register_blueprints(app):
     """
@@ -51,3 +53,5 @@ def register_blueprints(app):
     app.register_blueprint(documents_bp)
     app.register_blueprint(notifications_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(clients_bp)
+    app.register_blueprint(project_managers_bp)

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Create Project Manager - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Create Project Manager</h1>
+    <p class="text-muted">Register a new Project Manager system profile and login account</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="table-card p-4">
+            <form method="POST" action="{{ url_for('project_managers.add') }}">
+                <h5 class="mb-3 border-bottom pb-2">Account Details</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" name="name" id="name" class="form-control" placeholder="Full Name" value="{{ form.name if form else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email Address (Login) <span class="text-danger">*</span></label>
+                        <input type="email" name="email" id="email" class="form-control" placeholder="name@company.com" value="{{ form.email if form else '' }}" required autocomplete="username">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                        <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="new-password">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="confirm_password" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                        <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="••••••••" required autocomplete="new-password">
+                    </div>
+                </div>
+
+                <h5 class="mb-3 border-bottom pb-2">Profile Details</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="employee_id" class="form-label">Employee ID</label>
+                        <input type="text" name="employee_id" id="employee_id" class="form-control" placeholder="e.g. EMP-2026-1025" value="{{ form.employee_id if form else '' }}">
+                        <small class="text-muted">Will be automatically generated if left blank.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="department" class="form-label">Department</label>
+                        <input type="text" name="department" id="department" class="form-control" placeholder="e.g. Operations" value="{{ form.department if form else '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="text" name="phone" id="phone" class="form-control" placeholder="e.g. 555-0199" value="{{ form.phone if form else '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Role</label>
+                        <input type="text" class="form-control" value="Project Manager" readonly disabled>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <a href="{{ url_for('project_managers.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Create Project Manager</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

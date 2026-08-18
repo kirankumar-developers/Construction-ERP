@@ -25,6 +25,8 @@
                             {% for c in clients %}
                             <option value="{{ c._id }}">{{ c.company_name }} ({{ c.client_name }})</option>
                             {% endfor %}
+                            <option value="" disabled>─────────────────────</option>
+                            <option value="create_new_client">+ Create New Client</option>
                         </select>
                     </div>
                     
@@ -35,6 +37,10 @@
                             {% for m in managers %}
                             <option value="{{ m._id }}">{{ m.name }}</option>
                             {% endfor %}
+                            {% if session.role in ['super_admin', 'admin'] %}
+                            <option value="" disabled>────────────────────────</option>
+                            <option value="create_new_manager">+ Create New Project Manager</option>
+                            {% endif %}
                         </select>
                     </div>
                     
@@ -96,6 +102,116 @@
         </div>
     </div>
 </div>
+
+<!-- Create New Client Modal -->
+<div class="modal fade" id="createClientModal" tabindex="-1" aria-labelledby="createClientModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createClientModalLabel">Create New Client</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="quickClientForm">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="modal_client_name" class="form-label">Client Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="modal_client_name" name="client_name" required>
+          </div>
+          <div class="mb-3">
+            <label for="modal_company_name" class="form-label">Company Name</label>
+            <input type="text" class="form-control" id="modal_company_name" name="company_name">
+          </div>
+          <div class="mb-3">
+            <label for="modal_client_email" class="form-label">Email <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" id="modal_client_email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="modal_client_phone" class="form-label">Phone</label>
+            <input type="text" class="form-control" id="modal_client_phone" name="phone">
+          </div>
+          <div class="mb-3">
+            <label for="modal_client_address" class="form-label">Address</label>
+            <input type="text" class="form-control" id="modal_client_address" name="address">
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="modal_client_city" class="form-label">City</label>
+              <input type="text" class="form-control" id="modal_client_city" name="city">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="modal_client_state" class="form-label">State</label>
+              <input type="text" class="form-control" id="modal_client_state" name="state">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="modal_client_country" class="form-label">Country</label>
+              <input type="text" class="form-control" id="modal_client_country" name="country">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="modal_client_gst" class="form-label">GST / Tax Number</label>
+            <input type="text" class="form-control" id="modal_client_gst" name="gst_details">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveClientBtn">Save Client</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Create New Project Manager Modal -->
+<div class="modal fade" id="createManagerModal" tabindex="-1" aria-labelledby="createManagerModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createManagerModalLabel">Create New Project Manager</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="quickManagerForm">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="modal_manager_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="modal_manager_name" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="modal_manager_email" class="form-label">Email <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" id="modal_manager_email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="modal_manager_phone" class="form-label">Phone</label>
+            <input type="text" class="form-control" id="modal_manager_phone" name="phone">
+          </div>
+          <div class="mb-3">
+            <label for="modal_manager_emp_id" class="form-label">Employee ID</label>
+            <input type="text" class="form-control" id="modal_manager_emp_id" name="employee_id">
+          </div>
+          <div class="mb-3">
+            <label for="modal_manager_dept" class="form-label">Department</label>
+            <input type="text" class="form-control" id="modal_manager_dept" name="department" placeholder="e.g. Operations">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <input type="text" class="form-control" value="Project Manager" readonly disabled>
+          </div>
+          <div class="mb-3">
+            <label for="modal_manager_password" class="form-label">Password <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="modal_manager_password" name="password" required>
+          </div>
+          <div class="mb-3">
+            <label for="modal_manager_confirm_password" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="modal_manager_confirm_password" name="confirm_password" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveManagerBtn">Save Project Manager</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -122,6 +238,233 @@
                 marker = L.marker(e.latlng).addTo(map);
             }
         });
+
+        // Toast Notification Helper
+        function showToast(message, type = 'success') {
+            let container = document.querySelector('.toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'toast-container';
+                const mainContent = document.querySelector('#content .container-fluid');
+                if (mainContent) {
+                    mainContent.insertBefore(container, mainContent.firstChild);
+                } else {
+                    document.body.appendChild(container);
+                }
+            }
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show shadow-sm`;
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            container.appendChild(alertDiv);
+            
+            setTimeout(function() {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Alert) {
+                    const bsAlert = new bootstrap.Alert(alertDiv);
+                    bsAlert.close();
+                } else {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Dropdown interactions
+        const clientSelect = document.getElementById('client_id');
+        const managerSelect = document.getElementById('manager_id');
+
+        clientSelect.addEventListener('change', function() {
+            if (this.value === 'create_new_client') {
+                this.value = '';
+                const createClientModal = new bootstrap.Modal(document.getElementById('createClientModal'));
+                createClientModal.show();
+            }
+        });
+
+        if (managerSelect) {
+            managerSelect.addEventListener('change', function() {
+                if (this.value === 'create_new_manager') {
+                    this.value = '';
+                    const createManagerModal = new bootstrap.Modal(document.getElementById('createManagerModal'));
+                    createManagerModal.show();
+                }
+            });
+        }
+
+        // Form Submission - Quick Client
+        const quickClientForm = document.getElementById('quickClientForm');
+        quickClientForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const saveBtn = document.getElementById('saveClientBtn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+            
+            fetch('/clients/create-quick', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json().then(data => ({ status: response.status, data })))
+            .then(({ status, data }) => {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+                
+                if (data.success) {
+                    const modalEl = document.getElementById('createClientModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                    
+                    showToast(data.message, 'success');
+                    refreshClientsDropdown(data.client.id);
+                    quickClientForm.reset();
+                } else {
+                    showToast(data.message || 'Error creating client', 'error');
+                }
+            })
+            .catch(err => {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+                console.error(err);
+                showToast('Server communication failure', 'error');
+            });
+        });
+
+        function refreshClientsDropdown(selectId) {
+            fetch('/clients/list', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    clientSelect.innerHTML = '<option value="">Select Client</option>';
+                    data.clients.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.company_name ? `${c.company_name} (${c.client_name})` : c.client_name;
+                        clientSelect.appendChild(opt);
+                    });
+                    
+                    const divider = document.createElement('option');
+                    divider.value = "";
+                    divider.disabled = true;
+                    divider.textContent = "─────────────────────";
+                    clientSelect.appendChild(divider);
+                    
+                    const createOpt = document.createElement('option');
+                    createOpt.value = "create_new_client";
+                    createOpt.textContent = "+ Create New Client";
+                    clientSelect.appendChild(createOpt);
+                    
+                    if (selectId) {
+                        clientSelect.value = selectId;
+                    }
+                }
+            })
+            .catch(err => console.error("Error refreshing clients:", err));
+        }
+
+        // Form Submission - Quick Project Manager
+        const quickManagerForm = document.getElementById('quickManagerForm');
+        if (quickManagerForm) {
+            quickManagerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const password = document.getElementById('modal_manager_password').value;
+                const confirmPassword = document.getElementById('modal_manager_confirm_password').value;
+                
+                if (password !== confirmPassword) {
+                    showToast('Passwords do not match', 'error');
+                    return;
+                }
+                
+                const formData = new FormData(this);
+                const saveBtn = document.getElementById('saveManagerBtn');
+                const originalText = saveBtn.innerHTML;
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+                
+                fetch('/project-managers/quick-create', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json().then(data => ({ status: response.status, data })))
+                .then(({ status, data }) => {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalText;
+                    
+                    if (data.success) {
+                        const modalEl = document.getElementById('createManagerModal');
+                        const modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        
+                        showToast(data.message, 'success');
+                        refreshManagersDropdown(data.project_manager.id);
+                        quickManagerForm.reset();
+                    } else {
+                        showToast(data.message || 'Error creating project manager', 'error');
+                    }
+                })
+                .catch(err => {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalText;
+                    console.error(err);
+                    showToast('Server communication failure', 'error');
+                });
+            });
+        }
+
+        function refreshManagersDropdown(selectId) {
+            if (!managerSelect) return;
+            fetch('/users/project-managers/list', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    managerSelect.innerHTML = '<option value="">Select Manager</option>';
+                    data.project_managers.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.id;
+                        opt.textContent = m.name;
+                        managerSelect.appendChild(opt);
+                    });
+                    
+                    const hasQuickCreate = {% if session.role in ['super_admin', 'admin'] %}true{% else %}false{% endif %};
+                    if (hasQuickCreate) {
+                        const divider = document.createElement('option');
+                        divider.value = "";
+                        divider.disabled = true;
+                        divider.textContent = "────────────────────────";
+                        managerSelect.appendChild(divider);
+                        
+                        const createOpt = document.createElement('option');
+                        createOpt.value = "create_new_manager";
+                        createOpt.textContent = "+ Create New Project Manager";
+                        managerSelect.appendChild(createOpt);
+                    }
+                    
+                    if (selectId) {
+                        managerSelect.value = selectId;
+                    }
+                }
+            })
+            .catch(err => console.error("Error refreshing managers:", err));
+        }
     });
 </script>
 {% endblock %}

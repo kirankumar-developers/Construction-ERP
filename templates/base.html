@@ -38,6 +38,14 @@
                     </li>
                 {% endif %}
                 
+                {% if session.role in ['super_admin', 'admin'] %}
+                    <li class="border-top border-secondary my-2"></li>
+                    <li class="text-uppercase text-muted px-3 pt-1" style="font-size: 11px; letter-spacing: 1px; color: #adb5bd !important;">Admin Management</li>
+                    <li class="{% if '/project-managers' in request.path %}active{% endif %}">
+                        <a href="{{ url_for('project_managers.index') }}"><i class="bi bi-person-badge"></i> Project Managers</a>
+                    </li>
+                {% endif %}
+                
                 {% if session.role in ['super_admin', 'admin', 'project_manager', 'site_engineer', 'supervisor', 'client'] %}
                     <li class="{% if '/projects' in request.path %}active{% endif %}">
                         <a href="{{ url_for('projects.index') }}"><i class="bi bi-building"></i> Projects</a>

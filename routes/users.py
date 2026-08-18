@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, session
 from database.mongodb import get_db
-from utils.decorators import login_required, super_admin_required
+from utils.decorators import login_required, super_admin_required, role_required
 from utils.constants import Roles
 from utils.helpers import to_object_id
 from services.auth_service import (
@@ -169,3 +169,81 @@ def toggle_status(user_id):
     
     flash(f"User {user['name']} has been {'activated' if new_status else 'deactivated'}.", "success")
     return redirect(url_for('users.index'))
+
+@users_bp.route('/create-project-manager', methods=['POST'])
+@login_required
+@super_admin_required
+def create_project_manager():
+    db = get_db()
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip().lower()
+    phone = request.form.get('phone', '').strip()
+    employee_id = request.form.get('employee_id', '').strip()
+    department = request.form.get('department', '').strip() or 'General'
+    password = request.form.get('password', '')
+    confirm_password = request.form.get('confirm_password', '')
+    
+    if not name or not email or not password or not confirm_password:
+        return jsonify({'success': False, 'message': 'Full Name, Email, Password, and Confirm Password are required'}), 400
+        
+    if password != confirm_password:
+        return jsonify({'success': False, 'message': 'Passwords do not match'}), 400
+        
+    # Check if email is already registered
+    existing_user = db.users.find_one({'email': email})
+    if existing_user:
+        return jsonify({'success': False, 'message': 'Email is already registered'}), 400
+        
+    company_id = session.get('company_id')
+    
+    # Register project manager as employee
+    user, err = register_employee(
+        name=name,
+        email=email,
+        password=password,
+        role=Roles.PROJECT_MANAGER,
+        department=department,
+        designation='Project Manager',
+        phone=phone,
+        address='',
+        company_id=company_id
+    )
+    
+    if err:
+        return jsonify({'success': False, 'message': err}), 400
+        
+    # If custom employee ID is provided, update it
+    if employee_id:
+        db.employees.update_one({'user_id': user['_id']}, {'$set': {'employee_id': employee_id}})
+        
+    return jsonify({
+        'success': True,
+        'message': 'Project Manager created successfully',
+        'project_manager': {
+            'id': str(user['_id']),
+            'name': name
+        }
+    })
+
+@users_bp.route('/project-managers/list', methods=['GET'])
+@login_required
+@role_required(Roles.SUPER_ADMIN, Roles.ADMIN)
+def list_project_managers():
+    db = get_db()
+    managers = list(db.users.find({
+        'role': Roles.PROJECT_MANAGER,
+        '$or': [
+            {'is_active': True},
+            {'status': 'active'}
+        ]
+    }))
+    managers_list = []
+    for m in managers:
+        managers_list.append({
+            'id': str(m['_id']),
+            'name': m.get('name', '')
+        })
+    return jsonify({
+        'success': True,
+        'project_managers': managers_list
+    })
