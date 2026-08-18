@@ -32,7 +32,7 @@
                     <a href="{{ url_for('dashboard.index') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
                 </li>
                 
-                {% if session.role in ['super_admin', 'admin'] %}
+                {% if session.role == 'super_admin' %}
                     <li class="{% if '/users' in request.path %}active{% endif %}">
                         <a href="{{ url_for('users.index') }}"><i class="bi bi-people"></i> Users</a>
                     </li>

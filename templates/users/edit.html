@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Edit User Profile</h1>
+    <p class="text-muted">Modify account details and role assignment</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="table-card">
+            <form method="POST" action="{{ url_for('users.edit', user_id=user._id) }}">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" name="name" id="name" class="form-control" value="{{ user.name }}" required>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="email" class="form-label">Email Address (Login)</label>
+                        <input type="email" name="email" id="email" class="form-control" value="{{ user.email }}" required autocomplete="username">
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="role" class="form-label">System Role</label>
+                        <select name="role" id="role" class="form-select" required>
+                            {% for r in Roles.ALL_ROLES %}
+                            <option value="{{ r }}" {% if user.role == r %}selected{% endif %}>{{ r.upper().replace('_', ' ') }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12 text-end mt-4">
+                        <a href="{{ url_for('users.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

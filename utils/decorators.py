@@ -1,6 +1,16 @@
 from functools import wraps
 from flask import session, request, redirect, url_for, flash, abort, jsonify
 
+class CurrentUser:
+    @property
+    def role(self):
+        r = session.get('role')
+        if r == 'super_admin':
+            return 'Super Administrator'
+        return r
+
+current_user = CurrentUser()
+
 def login_required(f):
     """
     Decorator to ensure the user is logged in before accessing a route.
@@ -34,3 +44,19 @@ def role_required(*roles):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+def super_admin_required(f):
+    """
+    Decorator to restrict access only to the Super Administrator role.
+    Only allows access when current_user.role == "Super Administrator".
+    All other roles must be denied (aborted with 403).
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in to access this page.', 'warning')
+            return redirect(url_for('auth.login', next=request.url))
+        if current_user.role != "Super Administrator":
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
