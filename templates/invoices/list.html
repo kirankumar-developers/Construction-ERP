@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Invoices - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Client Invoices</h1>
+        <p class="text-muted">Generate and track billing receipts</p>
+    </div>
+    {% if session.role in ['super_admin', 'admin', 'project_manager'] %}
+    <a href="{{ url_for('invoices.add') }}" class="btn btn-primary"><i class="bi bi-file-earmark-plus"></i> Generate Invoice</a>
+    {% endif %}
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Invoice No</th>
+                    <th>Project</th>
+                    <th>Client Name</th>
+                    <th>Total Billing (incl. tax)</th>
+                    <th>Status</th>
+                    <th>Date Generated</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inv in invoices %}
+                <tr>
+                    <td><code>{{ inv.invoice_number }}</code></td>
+                    <td>{{ inv.project_name }}</td>
+                    <td><strong>{{ inv.client_name }}</strong></td>
+                    <td><strong>${{ "{:,.2f}".format(inv.total_amount) }}</strong></td>
+                    <td>
+                        <span class="badge bg-{% if inv.status == 'paid' %}success{% elif inv.status == 'overdue' %}danger{% else %}warning{% endif %}">
+                            {{ inv.status.upper() }}
+                        </span>
+                    </td>
+                    <td>{{ inv.created_at | datetime }}</td>
+                    <td>
+                        <a href="{{ url_for('invoices.view', invoice_id=inv._id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-printer"></i> View & Print</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">No invoices generated yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

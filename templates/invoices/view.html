@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice Details - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+    <div>
+        <h1 class="h3 mb-0">Invoice Preview</h1>
+        <p class="text-muted">Print or save this billing statement</p>
+    </div>
+    <div>
+        <a href="{{ url_for('invoices.index') }}" class="btn btn-outline-secondary me-2">Back to Invoices</a>
+        <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer"></i> Print Invoice</button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card p-5 shadow-sm border" id="printableInvoice">
+            <!-- Header -->
+            <div class="row border-bottom pb-4 mb-4">
+                <div class="col-md-6">
+                    <h2 class="text-primary mb-1">Construction ERP</h2>
+                    <p class="text-muted mb-0">123 Construction Ave, Suite 400<br>New York, NY 10001<br>Phone: (555) 019-2831</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h3 class="mb-1">INVOICE</h3>
+                    <p class="mb-0 text-muted"><strong>Invoice Number:</strong> <code>{{ invoice.invoice_number }}</code></p>
+                    <p class="mb-0 text-muted"><strong>Date Generated:</strong> {{ invoice.created_at | datetime("%Y-%m-%d") }}</p>
+                </div>
+            </div>
+
+            <!-- Customer Details -->
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <h6 class="text-muted text-uppercase mb-2">Billed To:</h6>
+                    <h5><strong>{{ invoice.client_name }}</strong></h5>
+                    <p class="text-muted mb-0">
+                        {{ invoice.client_address or 'No address provided.' }}<br>
+                        Phone: {{ invoice.client_phone or 'N/A' }}
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h6 class="text-muted text-uppercase mb-2">Project:</h6>
+                    <h5><strong>{{ invoice.project_name }}</strong></h5>
+                </div>
+            </div>
+
+            <!-- Items Table -->
+            <div class="table-responsive mb-4">
+                <table class="table align-middle">
+                    <thead>
+                        <tr class="table-light">
+                            <th>Billing Item Description</th>
+                            <th class="text-end">Quantity</th>
+                            <th class="text-end">Unit Rate ($)</th>
+                            <th class="text-end">Total Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in invoice.items %}
+                        <tr>
+                            <td>{{ item.description }}</td>
+                            <td class="text-end">{{ item.quantity }}</td>
+                            <td class="text-end">${{ "{:,.2f}".format(item.rate) }}</td>
+                            <td class="text-end"><strong>${{ "{:,.2f}".format(item.total) }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totals -->
+            <div class="row justify-content-end">
+                <div class="col-md-5 text-md-end">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal:</span>
+                        <strong>${{ "{:,.2f}".format(invoice.total_amount / (1 + (invoice.tax_rate / 100.0))) }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tax ({{ invoice.tax_rate }}%):</span>
+                        <strong>${{ "{:,.2f}".format(invoice.tax_amount) }}</strong>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <h4 class="text-primary">Net Total:</h4>
+                        <h4 class="text-primary"><strong>${{ "{:,.2f}".format(invoice.total_amount) }}</strong></h4>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-top pt-4 mt-5 text-center text-muted small">
+                <p>Thank you for your business. For billing queries, contact support@constructionerp.com.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

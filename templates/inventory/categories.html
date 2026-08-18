@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Material Categories - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Material Categories</h1>
+    <p class="text-muted">Define stock classifications</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-5">
+        <div class="table-card">
+            <h5 class="mb-3">Add Category</h5>
+            <form method="POST" action="{{ url_for('materials.categories') }}">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Category Name</label>
+                    <input type="text" name="name" id="name" class="form-control" placeholder="Cement, Aggregate, Steel..." required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Save Category</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-md-7">
+        <div class="table-card">
+            <h5 class="mb-3">Existing Categories</h5>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Category Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in categories %}
+                        <tr>
+                            <td><strong>{{ cat.name }}</strong></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td class="text-center text-muted">No categories defined yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

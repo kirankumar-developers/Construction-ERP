@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Super Admin Dashboard - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Super Admin Dashboard</h1>
+        <p class="text-muted">Global analytics across all entities</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Total Users -->
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-primary">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="text-muted">Total Users</div>
+            <h3 class="mb-0">{{ total_users }}</h3>
+        </div>
+    </div>
+    
+    <!-- Total Projects -->
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-secondary">
+                <i class="bi bi-building"></i>
+            </div>
+            <div class="text-muted">Total Projects</div>
+            <h3 class="mb-0">{{ total_projects }}</h3>
+        </div>
+    </div>
+
+    <!-- Active Projects -->
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-success">
+                <i class="bi bi-play-circle"></i>
+            </div>
+            <div class="text-muted">Active Projects</div>
+            <h3 class="mb-0">{{ active_projects }}</h3>
+        </div>
+    </div>
+
+    <!-- Total Revenue -->
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-warning">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="text-muted">Total Revenue</div>
+            <h3 class="mb-0">${{ "{:,.2f}".format(total_revenue) }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="table-card">
+            <h5 class="mb-4">Recent Activity Logs</h5>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for act in recent_activity %}
+                        <tr>
+                            <td><strong>{{ act.user_name }}</strong></td>
+                            <td>{{ act.action }}</td>
+                            <td>{{ act.timestamp | datetime }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No recent activity</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card mb-4">
+            <h5 class="mb-4">Financial Summary</h5>
+            <div class="d-flex justify-content-between mb-2">
+                <span>Revenue:</span>
+                <strong class="text-success">${{ "{:,.2f}".format(total_revenue) }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span>Expenses:</span>
+                <strong class="text-danger">${{ "{:,.2f}".format(total_expenses) }}</strong>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between">
+                <span>Net Cashflow:</span>
+                <strong>${{ "{:,.2f}".format(total_revenue - total_expenses) }}</strong>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

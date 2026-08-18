@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Admin Dashboard</h1>
+        <p class="text-muted">Operations management overview</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-primary">
+                <i class="bi bi-building"></i>
+            </div>
+            <div class="text-muted">Total Projects</div>
+            <h3 class="mb-0">{{ projects_count }}</h3>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-secondary">
+                <i class="bi bi-geo-alt"></i>
+            </div>
+            <div class="text-muted">Total Sites</div>
+            <h3 class="mb-0">{{ sites_count }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-success">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="text-muted">Employees / Labour</div>
+            <h3 class="mb-0">{{ employees_count }} / {{ labour_count }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-danger">
+                <i class="bi bi-exclamation-octagon"></i>
+            </div>
+            <div class="text-muted">Pending Approvals</div>
+            <h3 class="mb-0">{{ pending_approvals }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="stat-card">
+            <h5 class="mb-4">Quick Financial Summary</h5>
+            <div class="d-flex justify-content-between mb-3">
+                <span>Total Payments:</span>
+                <strong class="text-success">${{ "{:,.2f}".format(total_payments) }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+                <span>Approved Expenses:</span>
+                <strong class="text-danger">${{ "{:,.2f}".format(total_expenses) }}</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Inventory Stock Count:</span>
+                <strong>{{ stock_count }} Units</strong>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="stat-card">
+            <h5 class="mb-4">System Shortcuts</h5>
+            <div class="row g-2">
+                <div class="col-6"><a href="{{ url_for('projects.add') }}" class="btn btn-outline-primary w-100 p-3"><i class="bi bi-plus-circle d-block mb-1"></i> New Project</a></div>
+                <div class="col-6"><a href="{{ url_for('sites.add') }}" class="btn btn-outline-secondary w-100 p-3"><i class="bi bi-geo-alt d-block mb-1"></i> New Site</a></div>
+                <div class="col-6"><a href="{{ url_for('users.add_user') }}" class="btn btn-outline-success w-100 p-3"><i class="bi bi-person-plus d-block mb-1"></i> Add User</a></div>
+                <div class="col-6"><a href="{{ url_for('materials.stock_in') }}" class="btn btn-outline-warning w-100 p-3"><i class="bi bi-box-seam d-block mb-1"></i> Stock In</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

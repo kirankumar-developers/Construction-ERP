@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Project Details - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Project Details - {{ project.name }}</h1>
+        <p class="text-muted">Code: <code>{{ project.project_code }}</code></p>
+    </div>
+    <div>
+        <a href="{{ url_for('projects.index') }}" class="btn btn-outline-secondary me-2">Back to List</a>
+        {% if session.role in ['super_admin', 'admin', 'project_manager'] %}
+        <a href="{{ url_for('projects.edit', project_id=project._id) }}" class="btn btn-primary">Edit Project</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Quick Statistics -->
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-primary">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="text-muted">Timeline Dates</div>
+            <p class="mb-0 small"><strong>Start:</strong> {{ project.start_date }}</p>
+            <p class="mb-0 small"><strong>End:</strong> {{ project.end_date }}</p>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-secondary">
+                <i class="bi bi-cash-coin"></i>
+            </div>
+            <div class="text-muted">Budget vs Actual</div>
+            <p class="mb-0 small"><strong>Budget:</strong> ${{ "{:,.2f}".format(project.budget) }}</p>
+            <p class="mb-0 small text-danger"><strong>Actual:</strong> ${{ "{:,.2f}".format(actual_cost) }}</p>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-success">
+                <i class="bi bi-person-fill-check"></i>
+            </div>
+            <div class="text-muted">Project Management</div>
+            <p class="mb-0 small"><strong>PM:</strong> {{ project.manager_name }}</p>
+            <p class="mb-0 small text-truncate"><strong>Client:</strong> {{ project.client_name }}</p>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-warning">
+                <i class="bi bi-circle-half"></i>
+            </div>
+            <div class="text-muted">Progress Status</div>
+            <div class="progress mt-2" style="height: 6px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ project.progress }}%"></div>
+            </div>
+            <small class="text-muted mt-1 d-block">{{ project.progress }}% Complete ({{ project.status.upper() }})</small>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Map Location -->
+    <div class="col-md-6">
+        <div class="table-card">
+            <h5 class="mb-4">Project Map Coordinates</h5>
+            <div id="map" class="map-container-small"></div>
+            <p class="text-muted small mt-2 mb-0"><i class="bi bi-geo-alt-fill text-danger"></i> {{ project.location.address or "No address registered." }}</p>
+        </div>
+    </div>
+
+    <!-- Milestones -->
+    <div class="col-md-6">
+        <div class="table-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0">Milestones</h5>
+                {% if session.role in ['super_admin', 'admin', 'project_manager'] %}
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#milestoneModal">Add Milestone</button>
+                {% endif %}
+            </div>
+            <div class="list-group list-group-flush overflow-y-auto" style="max-height: 260px;">
+                {% for m in milestones %}
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                    <div>
+                        <strong class="{% if m.status == 'completed' %}text-decoration-line-through text-muted{% endif %}">{{ m.title }}</strong>
+                        <div class="text-muted small">Due: {{ m.due_date }}</div>
+                    </div>
+                    <div>
+                        <span class="badge bg-{% if m.status == 'completed' %}success{% else %}warning{% endif %} me-2">{{ m.status }}</span>
+                        {% if session.role in ['super_admin', 'admin', 'project_manager', 'site_engineer'] %}
+                        <form method="POST" action="{{ url_for('projects.toggle_milestone', milestone_id=m._id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-check-lg"></i></button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">No milestones found.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Sites -->
+    <div class="col-md-12">
+        <div class="table-card">
+            <h5 class="mb-4">Project Construction Sites</h5>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Site Code</th>
+                            <th>Name</th>
+                            <th>Address</th>
+                            <th>Site Engineer</th>
+                            <th>Supervisor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in sites %}
+                        <tr>
+                            <td><code>{{ s.site_code }}</code></td>
+                            <td><strong>{{ s.name }}</strong></td>
+                            <td>{{ s.address }}</td>
+                            <td>{{ s.engineer_name }}</td>
+                            <td>{{ s.supervisor_name }}</td>
+                            <td><span class="badge bg-success">{{ s.status }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No sites created for this project yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Adding Milestone -->
+<div class="modal fade" id="milestoneModal" tabindex="-1" aria-labelledby="milestoneModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="milestoneModalLabel">Add Milestone</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('projects.add_milestone', project_id=project._id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="m_title" class="form-label">Milestone Title</label>
+                        <input type="text" name="title" id="m_title" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="m_due_date" class="form-label">Due Date</label>
+                        <input type="date" name="due_date" id="m_due_date" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Milestone</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var lat = {{ project.location.lat or 0.0 }};
+        var lng = {{ project.location.lng or 0.0 }};
+        
+        if (lat !== 0 && lng !== 0) {
+            var map = L.map('map').setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            L.marker([lat, lng]).addTo(map).bindPopup("{{ project.name }}").openPopup();
+        } else {
+            document.getElementById('map').innerHTML = "<div class='text-center py-5 text-muted'>Location coordinates not pinned on map.</div>";
+        }
+    });
+</script>
+{% endblock %}

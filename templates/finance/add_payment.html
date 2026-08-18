@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Record Payment - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Record Financial Transaction</h1>
+    <p class="text-muted">Enter client receipt or supplier/vendor payment details</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="table-card">
+            <form method="POST" action="{{ url_for('payments.add') }}">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label for="reference_type" class="form-label">Transaction Type</label>
+                        <select name="reference_type" id="reference_type" class="form-select" onchange="toggleRefFields(this.value)" required>
+                            <option value="">Select Type</option>
+                            <option value="Invoice">Client Invoice Receipt (Inward)</option>
+                            <option value="Vendor">Supplier Purchase Bill (Outward)</option>
+                            <option value="Subcontractor">Subcontractor Billing Claim (Outward)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12 ref-field d-none" id="invoiceField">
+                        <label for="invoice_id" class="form-label">Client Invoice</label>
+                        <select name="invoice_id" id="invoice_id" class="form-select">
+                            <option value="">Select Invoice</option>
+                            {% for inv in invoices %}
+                            <option value="{{ inv._id }}">{{ inv.invoice_number }} - Total: ${{ "{:,.2f}".format(inv.total_amount) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-12 ref-field d-none" id="vendorField">
+                        <label for="vendor_id" class="form-label">Vendor Supplier</label>
+                        <select name="vendor_id" id="vendor_id" class="form-select">
+                            <option value="">Select Vendor</option>
+                            {% for v in vendors %}
+                            <option value="{{ v._id }}">{{ v.company_name }} (Outstanding: ${{ "{:,.2f}".format(v.outstanding_amount or 0.0) }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-12 ref-field d-none" id="subField">
+                        <label for="subcontractor_id" class="form-label">Subcontractor</label>
+                        <select name="subcontractor_id" id="subcontractor_id" class="form-select">
+                            <option value="">Select Subcontractor</option>
+                            {% for sub in subcontractors %}
+                            <option value="{{ sub._id }}">{{ sub.company_name }} (Contract: ${{ "{:,.2f}".format(sub.contract_value or 0.0) }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="amount" class="form-label">Payment Amount ($)</label>
+                        <input type="number" step="0.01" name="amount" id="amount" class="form-control" placeholder="0.00" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="payment_date" class="form-label">Transaction Date</label>
+                        <input type="date" name="payment_date" id="payment_date" class="form-control" required>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="payment_method" class="form-label">Payment Method</label>
+                        <select name="payment_method" id="payment_method" class="form-select" required>
+                            <option value="bank_transfer">Bank Wire Transfer</option>
+                            <option value="card">Credit/Debit Card</option>
+                            <option value="cash">Cash Payment</option>
+                            <option value="online">UPI / Net Banking</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12 text-end mt-4">
+                        <a href="{{ url_for('payments.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Process Transaction</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleRefFields(type) {
+        // hide all
+        var fields = document.getElementsByClassName('ref-field');
+        for (var i = 0; i < fields.length; i++) {
+            fields[i].classList.add('d-none');
+            fields[i].querySelector('select').removeAttribute('required');
+        }
+        
+        if (type === 'Invoice') {
+            document.getElementById('invoiceField').classList.remove('d-none');
+            document.getElementById('invoice_id').setAttribute('required', 'required');
+        } else if (type === 'Vendor') {
+            document.getElementById('vendorField').classList.remove('d-none');
+            document.getElementById('vendor_id').setAttribute('required', 'required');
+        } else if (type === 'Subcontractor') {
+            document.getElementById('subField').classList.remove('d-none');
+            document.getElementById('subcontractor_id').setAttribute('required', 'required');
+        }
+    }
+</script>
+{% endblock %}

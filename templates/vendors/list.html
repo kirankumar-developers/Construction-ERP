@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Vendors - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Supplier / Vendor Accounts</h1>
+        <p class="text-muted">Manage materials supplier directories and balances</p>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Company Name</th>
+                    <th>Contact Person</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>GST Details</th>
+                    <th>Outstanding Payable</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vendors %}
+                <tr>
+                    <td><strong>{{ v.company_name }}</strong></td>
+                    <td>{{ v.contact_person }}</td>
+                    <td>{{ v.email }}</td>
+                    <td>{{ v.phone }}</td>
+                    <td>{{ v.address }}</td>
+                    <td>{{ v.gst_details }}</td>
+                    <td class="text-danger"><strong>${{ "{:,.2f}".format(v.outstanding_amount or 0.0) }}</strong></td>
+                    <td>
+                        <a href="{{ url_for('vendors.view', vendor_id=v._id) }}" class="btn btn-sm btn-outline-primary">History</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No vendors registered.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

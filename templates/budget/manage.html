@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Budget - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Manage Category Budgets - {{ project.name }}</h1>
+    <p class="text-muted">Set funding targets for different project items</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="table-card">
+            <form method="POST" action="{{ url_for('budget.manage', project_id=project._id) }}">
+                <div class="row g-3">
+                    {% for cat in categories %}
+                    <div class="col-md-12">
+                        <label for="budget_{{ cat }}" class="form-label">{{ cat }} Budget ($)</label>
+                        <input type="number" step="0.01" name="budget_{{ cat }}" id="budget_{{ cat }}" class="form-control" value="{{ existing.get(cat, 0.0) }}" required>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="col-md-12 text-end mt-4">
+                        <a href="{{ url_for('budget.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Update Allocations</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Customers - OnsitePro{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-12">
+        <h2 class="m-0"><i class="bi bi-person-badge me-2"></i> Customers Directory</h2>
+        <p class="text-muted m-0">Directory of registered customers, addresses, and billing records.</p>
+    </div>
+</div>
+
+<!-- Customers Directory Table Card -->
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Email Address</th>
+                    <th>Phone Number</th>
+                    <th>Street Address</th>
+                    <th>City</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if customers %}
+                    {% for cust in customers %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; font-weight: 600;">
+                                        {{ cust.customer_name[:1].upper() }}
+                                    </div>
+                                    <div>
+                                        <strong class="text-dark">{{ cust.customer_name }}</strong>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ cust.email }}</td>
+                            <td>{{ cust.phone }}</td>
+                            <td>{{ cust.address }}</td>
+                            <td>{{ cust.city }}</td>
+                            <td>
+                                {% if cust.is_active %}
+                                    <span class="badge bg-success-subtle text-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">No customers registered yet.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

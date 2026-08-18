@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Log Attendance - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Labour Attendance Logging Sheet</h1>
+    <p class="text-muted">Record daily shifts status and calculate worker wages</p>
+</div>
+
+<div class="table-card mb-4">
+    <h5 class="mb-3">Select Site & Date</h5>
+    <form method="GET" action="{{ url_for('labour.log_attendance') }}" class="row g-2">
+        <div class="col-md-5">
+            <select name="site_id" class="form-select" required onchange="this.form.submit()">
+                <option value="">Select Construction Site</option>
+                {% for s in sites %}
+                <option value="{{ s._id }}" {% if selected_site_id == s._id %}selected{% endif %}>{{ s.name }} ({{ s.site_code }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-5">
+            <input type="date" name="date" class="form-control" value="{{ date }}" onchange="this.form.submit()">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Load Sheet</button>
+        </div>
+    </form>
+</div>
+
+{% if selected_site_id %}
+<div class="table-card">
+    <form method="POST" action="{{ url_for('labour.log_attendance') }}">
+        <input type="hidden" name="site_id" value="{{ selected_site_id }}">
+        <input type="hidden" name="date" value="{{ date }}">
+        
+        <div class="table-responsive mb-4">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Labour ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Attendance Status</th>
+                        <th>Shift Hours</th>
+                        <th>Overtime (Hrs)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in labours %}
+                    <tr>
+                        <td>
+                            <code>{{ l.labour_id }}</code>
+                            <input type="hidden" name="labor_ids" value="{{ l._id }}">
+                        </td>
+                        <td><strong>{{ l.name }}</strong></td>
+                        <td><span class="badge bg-secondary">{{ l.category }}</span></td>
+                        <td>
+                            <select name="status_{{ l._id }}" class="form-select w-auto">
+                                <option value="Present" {% if l.att_record.status == 'Present' %}selected{% endif %}>Present</option>
+                                <option value="Absent" {% if l.att_record.status == 'Absent' %}selected{% endif %}>Absent</option>
+                                <option value="Half Day" {% if l.att_record.status == 'Half Day' %}selected{% endif %}>Half Day</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" step="0.5" name="hours_{{ l._id }}" class="form-control w-auto d-inline" style="width: 80px;" value="{{ l.att_record.working_hours or 8.0 }}" required>
+                        </td>
+                        <td>
+                            <input type="number" step="0.5" name="ot_{{ l._id }}" class="form-control w-auto d-inline" style="width: 80px;" value="{{ l.att_record.overtime or 0.0 }}" required>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No active labourers registered for this site.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary" {% if not labours %}disabled{% endif %}>Save Attendance Sheet</button>
+        </div>
+    </form>
+</div>
+{% endif %}
+{% endblock %}

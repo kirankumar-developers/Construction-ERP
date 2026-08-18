@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Payments - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Financial Transactions Ledger</h1>
+        <p class="text-muted">History of client receipts and outgoing payments</p>
+    </div>
+    {% if session.role in ['super_admin', 'admin', 'project_manager'] %}
+    <a href="{{ url_for('payments.add') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Record Payment</a>
+    {% endif %}
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Payment Date</th>
+                    <th>Payment Ref Details</th>
+                    <th>Type</th>
+                    <th>Payment Method</th>
+                    <th>Amount Received / Paid</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                <tr>
+                    <td>{{ p.payment_date }}</td>
+                    <td><strong>{{ p.ref_details }}</strong></td>
+                    <td>{{ p.reference_type }}</td>
+                    <td><span class="badge bg-secondary">{{ p.payment_method.replace('_', ' ').upper() }}</span></td>
+                    <td><strong class="{% if p.reference_type == 'Invoice' %}text-success{% else %}text-danger{% endif %}">
+                        {% if p.reference_type == 'Invoice' %}+{% else %}-{% endif %}${{ "{:,.2f}".format(p.amount) }}
+                    </strong></td>
+                    <td><span class="badge bg-success">PAID</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">No transactions recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Expenses - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Project Expense Registry</h1>
+        <p class="text-muted">Review, record, and approve site expenditures</p>
+    </div>
+    {% if session.role in ['super_admin', 'admin', 'project_manager', 'site_engineer'] %}
+    <a href="{{ url_for('expenses.add') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Log Expense</a>
+    {% endif %}
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Project / Site</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Receipt</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in expenses %}
+                <tr>
+                    <td>{{ e.expense_date }}</td>
+                    <td>{{ e.project_name }} / {{ e.site_name }}</td>
+                    <td><span class="badge bg-secondary">{{ e.category }}</span></td>
+                    <td><strong>${{ "{:,.2f}".format(e.amount) }}</strong></td>
+                    <td>{{ e.description }}</td>
+                    <td>
+                        {% if e.receipt_image %}
+                        <a href="{{ e.receipt_image }}" target="_blank"><i class="bi bi-file-image text-primary"></i> Receipt File</a>
+                        {% else %}
+                        <span class="text-muted">None</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if e.status == 'approved' %}success{% elif e.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                            {{ e.status.upper() }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if e.status == 'pending' and session.role in ['super_admin', 'admin', 'project_manager'] %}
+                        <form method="POST" action="{{ url_for('expenses.approve', expense_id=e._id) }}" class="d-inline">
+                            <button type="submit" name="action" value="approve" class="btn btn-sm btn-success me-1">Approve</button>
+                            <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted">Processed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No expenses recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

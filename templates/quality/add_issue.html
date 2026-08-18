@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Report Snag - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Report Snag / Site Issue</h1>
+    <p class="text-muted">Document structural defects or safety incidents</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="table-card">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label for="project_id" class="form-label">Project</label>
+                        <select name="project_id" id="project_id" class="form-select" required>
+                            <option value="">Select Project</option>
+                            {% for p in projects %}
+                            <option value="{{ p._id }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="site_id" class="form-label">Site Assignment</label>
+                        <select name="site_id" id="site_id" class="form-select" required>
+                            <option value="">Select Site</option>
+                            {% for s in sites %}
+                            <option value="{{ s._id }}">{{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="title" class="form-label">Snag Title</label>
+                        <input type="text" name="title" id="title" class="form-control" placeholder="Concrete crack on wall / Missing safety net" required>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="description" class="form-label">Description / Remarks</label>
+                        <textarea name="description" id="description" class="form-control" rows="3" placeholder="Provide details on required corrective actions"></textarea>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="assigned_to" class="form-label">Assign To (Staff/Engineer)</label>
+                        <select name="assigned_to" id="assigned_to" class="form-select">
+                            <option value="">Select Assignee</option>
+                            {% for s in staff %}
+                            <option value="{{ s._id }}">{{ s.name }} ({{ s.role }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="priority" class="form-label">Priority</label>
+                        <select name="priority" id="priority" class="form-select">
+                            {% for p in TaskPriority.ALL %}
+                            <option value="{{ p }}">{{ p.title() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="due_date" class="form-label">Resolution Due Date</label>
+                        <input type="date" name="due_date" id="due_date" class="form-control">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="photo" class="form-label">Attach Verification Photo</label>
+                        <input type="file" name="photo" id="photo" class="form-control">
+                    </div>
+                    
+                    <div class="col-md-12 text-end mt-4">
+                        <a href="{{ url_for('issues.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Report Snag</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

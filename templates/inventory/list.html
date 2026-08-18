@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Material Stock - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Material Inventory Master</h1>
+        <p class="text-muted">Track company warehouse material stock levels</p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if session.role in ['super_admin', 'admin', 'project_manager'] %}
+        <a href="{{ url_for('materials.categories') }}" class="btn btn-outline-secondary"><i class="bi bi-tag"></i> Categories</a>
+        <a href="{{ url_for('materials.add') }}" class="btn btn-outline-primary"><i class="bi bi-plus-circle"></i> Add Material Item</a>
+        {% endif %}
+        <a href="{{ url_for('materials.stock_in') }}" class="btn btn-primary"><i class="bi bi-box-arrow-in-down"></i> Stock In</a>
+        <a href="{{ url_for('materials.stock_transfer') }}" class="btn btn-warning"><i class="bi bi-arrow-left-right"></i> Stock Transfer</a>
+        <a href="{{ url_for('materials.transactions') }}" class="btn btn-outline-info"><i class="bi bi-clock-history"></i> Ledger Logs</a>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Material Code</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Unit</th>
+                    <th>Purchase Rate</th>
+                    <th>Current Stock</th>
+                    <th>Minimum Stock Level</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in materials %}
+                <tr class="{% if m.low_stock %}table-danger-bg{% endif %}">
+                    <td><code>{{ m.material_code }}</code></td>
+                    <td><strong>{{ m.name }}</strong></td>
+                    <td>{{ m.category_name }}</td>
+                    <td>{{ m.unit }}</td>
+                    <td>${{ "{:,.2f}".format(m.purchase_rate) }}</td>
+                    <td><strong>{{ m.total_stock }}</strong></td>
+                    <td>{{ m.min_stock_level }}</td>
+                    <td>
+                        {% if m.low_stock %}
+                        <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> LOW STOCK</span>
+                        {% else %}
+                        <span class="badge bg-success">HEALTHY</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No materials registered in catalog.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

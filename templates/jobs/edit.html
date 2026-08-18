@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Job #{{ job.job_number }} - OnsitePro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h3 class="mb-2"><i class="bi bi-pencil-square me-2 text-primary"></i> Edit Job Ticket</h3>
+            <p class="text-muted">Modify schedules, priority, status, and job site coordinates.</p>
+            <hr class="mt-0 mb-4">
+
+            <form method="POST" action="{{ url_for('jobs.edit', job_id=job._id) }}">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Job Number</label>
+                        <input type="text" class="form-control" value="{{ job.job_number }}" disabled>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="status" class="form-label">Job Status</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="pending" {% if job.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="assigned" {% if job.status == 'assigned' %}selected{% endif %}>Assigned</option>
+                            <option value="accepted" {% if job.status == 'accepted' %}selected{% endif %}>Accepted</option>
+                            <option value="in_progress" {% if job.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                            <option value="on_hold" {% if job.status == 'on_hold' %}selected{% endif %}>On Hold</option>
+                            <option value="completed" {% if job.status == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="cancelled" {% if job.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="title" class="form-label font-weight-bold">Job Subject / Title</label>
+                    <input type="text" name="title" id="title" class="form-control" value="{{ job.title }}" required>
+                </div>
+
+                <!-- Scheduling -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <!-- Convert standard format to match local HTML datetime layout -->
+                        <label for="scheduled_date" class="form-label">Scheduled Date</label>
+                        <input type="datetime-local" name="scheduled_date" id="scheduled_date" class="form-control" 
+                               value="{% if job.scheduled_date %}{{ job.scheduled_date.strftime('%Y-%m-%dT%H:%M') }}{% endif %}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="due_date" class="form-label">Due Date</label>
+                        <input type="datetime-local" name="due_date" id="due_date" class="form-control" 
+                               value="{% if job.due_date %}{{ job.due_date.strftime('%Y-%m-%dT%H:%M') }}{% endif %}" required>
+                    </div>
+                </div>
+
+                <!-- Priority & Description -->
+                <div class="row mb-3">
+                    <div class="col-md-12 mb-3">
+                        <label for="priority" class="form-label">Priority</label>
+                        <select name="priority" id="priority" class="form-select">
+                            <option value="low" {% if job.priority == 'low' %}selected{% endif %}>Low</option>
+                            <option value="medium" {% if job.priority == 'medium' %}selected{% endif %}>Medium</option>
+                            <option value="high" {% if job.priority == 'high' %}selected{% endif %}>High</option>
+                            <option value="urgent" {% if job.priority == 'urgent' %}selected{% endif %}>Urgent</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="description" class="form-label">Work Scope Description</label>
+                        <textarea name="description" id="description" class="form-control" rows="4" required>{{ job.description }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Geolocation maps -->
+                <div class="mb-3">
+                    <label class="form-label">Job Site Location</label>
+                    <p class="text-muted small mb-2"><i class="bi bi-info-circle"></i> Reposition the pin to update coordinates.</p>
+                    
+                    <div id="jobEditMap" class="map-container-small mb-3"></div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <input type="text" name="address" id="address" class="form-control" value="{{ job.location.address }}" required>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <input type="text" name="lat" id="lat" class="form-control" readonly placeholder="Latitude">
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <input type="text" name="lng" id="lng" class="form-control" readonly placeholder="Longitude">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('jobs.detail', job_id=job._id) }}" class="btn btn-outline-secondary py-2 px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary py-2 px-4">Update Job Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var lat = {{ job.location.lat or 12.9716 }};
+    var lng = {{ job.location.lng or 77.5946 }};
+    var map = initLeafletMap('jobEditMap', lat, lng, true, '');
+    
+    document.getElementById('lat').value = lat.toFixed(6);
+    document.getElementById('lng').value = lng.toFixed(6);
+});
+</script>
+{% endblock %}

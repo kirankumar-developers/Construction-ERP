@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Create RFQ - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Generate RFQ for Request {{ request.request_number }}</h1>
+    <p class="text-muted">Select vendor recipients to invite for quotation bidding</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="table-card">
+            <form method="POST" action="{{ url_for('procurement.create_rfq', request_id=request._id) }}">
+                <h5 class="mb-3 border-bottom pb-2">Requested Material Scope</h5>
+                <ul class="list-group mb-4">
+                    {% for item in request.items %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><strong>{{ item.name }}</strong></span>
+                        <span>Quantity: {{ item.quantity }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                <h5 class="mb-3 border-bottom pb-2">Select Vendor Suppliers</h5>
+                <div class="row g-2 mb-4">
+                    {% for v in vendors %}
+                    <div class="col-md-6">
+                        <div class="form-check p-3 border rounded">
+                            <input class="form-check-input ms-0 me-2" type="checkbox" name="vendor_ids" value="{{ v._id }}" id="vendor_{{ v._id }}">
+                            <label class="form-check-label" for="vendor_{{ v._id }}">
+                                <strong>{{ v.company_name }}</strong>
+                                <small class="text-muted d-block">Contact: {{ v.contact_person }} | {{ v.email }}</small>
+                            </label>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-12 text-center text-muted">No suppliers registered.</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="text-end">
+                    <a href="{{ url_for('procurement.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary" {% if not vendors %}disabled{% endif %}>Send RFQ Invitations</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

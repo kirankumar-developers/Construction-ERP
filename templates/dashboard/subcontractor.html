@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Subcontractor Portal - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Subcontractor Portal</h1>
+        <p class="text-muted">Welcome, {{ session.name }} ({{ subcontractor.company_name if subcontractor else '' }})</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-primary">
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <div class="text-muted">Total Work Orders</div>
+            <h3 class="mb-0">{{ wo_count }}</h3>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-warning">
+                <i class="bi bi-play-circle"></i>
+            </div>
+            <div class="text-muted">Active Work Orders</div>
+            <h3 class="mb-0">{{ active_wo_count }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-success">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="text-muted">Contract Value</div>
+            <h3 class="mb-0">${{ "{:,.2f}".format(contract_value) }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-12">
+        <div class="table-card">
+            <h5 class="mb-4">My Assigned Work Orders</h5>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>WO Number</th>
+                            <th>Description</th>
+                            <th>Contract Value</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for wo in work_orders %}
+                        <tr>
+                            <td><code>{{ wo.work_order_number }}</code></td>
+                            <td>{{ wo.description }}</td>
+                            <td>${{ "{:,.2f}".format(wo.contract_amount) }}</td>
+                            <td>{{ wo.start_date }}</td>
+                            <td>{{ wo.end_date }}</td>
+                            <td><span class="badge bg-{% if wo.status == 'Completed' %}success{% else %}info{% endif %}">{{ wo.status }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No work orders assigned yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

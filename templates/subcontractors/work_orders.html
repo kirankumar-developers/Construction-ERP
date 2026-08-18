@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Work Orders - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Subcontractor Work Orders</h1>
+        <p class="text-muted">Issue and monitor subcontractor service contracts</p>
+    </div>
+    {% if session.role in ['super_admin', 'admin', 'project_manager'] %}
+    <a href="{{ url_for('subcontractors.add_work_order') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create Work Order</a>
+    {% endif %}
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>WO No</th>
+                    <th>Subcontractor</th>
+                    <th>Project / Site</th>
+                    <th>Contract Amount</th>
+                    <th>Start / End Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wo in work_orders %}
+                <tr>
+                    <td><code>{{ wo.work_order_number }}</code></td>
+                    <td><strong>{{ wo.subcontractor_name }}</strong></td>
+                    <td>{{ wo.project_name }} / {{ wo.site_name }}</td>
+                    <td><strong>${{ "{:,.2f}".format(wo.contract_amount) }}</strong></td>
+                    <td>{{ wo.start_date }} / {{ wo.end_date }}</td>
+                    <td>
+                        <span class="badge bg-{% if wo.status == 'Completed' %}success{% else %}info{% endif %}">
+                            {{ wo.status.upper() }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if wo.status == 'In Progress' and session.role in ['super_admin', 'admin', 'project_manager'] %}
+                        <form method="POST" action="{{ url_for('subcontractors.update_wo_status', wo_id=wo._id) }}" class="d-inline">
+                            <input type="hidden" name="status" value="Completed">
+                            <button type="submit" class="btn btn-sm btn-success">Complete Work</button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted">Done</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">No work orders issued yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

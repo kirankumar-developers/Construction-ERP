@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Document - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Upload Construction Document</h1>
+    <p class="text-muted">Register a drawing, BOQ, or contract file in the secure repository</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="table-card">
+            <form method="POST" action="{{ url_for('documents.upload') }}" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label for="project_id" class="form-label">Project</label>
+                        <select name="project_id" id="project_id" class="form-select" required>
+                            <option value="">Select Project</option>
+                            {% for p in projects %}
+                            <option value="{{ p._id }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="site_id" class="form-label">Site Assignment</label>
+                        <select name="site_id" id="site_id" class="form-select" required>
+                            <option value="">Select Site</option>
+                            {% for s in sites %}
+                            <option value="{{ s._id }}">{{ s.name }} ({{ s.site_code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="category" class="form-label">Document Category</label>
+                        <select name="category" id="category" class="form-select" required>
+                            {% for cat in DocumentCategory.ALL %}
+                            <option value="{{ cat }}">{{ cat.upper().replace('_', ' ') }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="document" class="form-label">Select File (PDF, Excel, Images, Word)</label>
+                        <input type="file" name="document" id="document" class="form-control" required>
+                    </div>
+                    
+                    <div class="col-md-12 text-end mt-4">
+                        <a href="{{ url_for('documents.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Upload Document</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

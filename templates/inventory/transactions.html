@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Stock Ledger - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Stock Ledger Logs</h1>
+        <p class="text-muted">Audit trail of all material stock changes</p>
+    </div>
+    <a href="{{ url_for('materials.index') }}" class="btn btn-outline-secondary">Back to Inventory</a>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Material Name</th>
+                    <th>Project</th>
+                    <th>Site</th>
+                    <th>Transaction Type</th>
+                    <th>Quantity</th>
+                    <th>Logged By</th>
+                    <th>Reference</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <td>{{ t.created_at | datetime }}</td>
+                    <td><strong>{{ t.material_name }}</strong></td>
+                    <td>{{ t.project_name }}</td>
+                    <td>{{ t.site_name }}</td>
+                    <td>
+                        <span class="badge bg-{% if t.type == 'Stock In' %}success{% else %}warning{% endif %}">
+                            {{ t.type }}
+                        </span>
+                    </td>
+                    <td><strong>{{ t.quantity }}</strong></td>
+                    <td>{{ t.user_name }}</td>
+                    <td>{{ t.reference_type or 'Manual Entry' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No stock transactions logged yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

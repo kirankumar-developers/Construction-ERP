@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Subcontractor Profile - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Subcontractor: {{ subcontractor.company_name }}</h1>
+        <p class="text-muted">Work Category: {{ subcontractor.work_category }}</p>
+    </div>
+    <a href="{{ url_for('subcontractors.index') }}" class="btn btn-outline-secondary">Back to List</a>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h5 class="mb-3">Contact Information</h5>
+            <p class="mb-1"><strong>Representative:</strong> {{ subcontractor.contact_person }}</p>
+            <p class="mb-1"><strong>Email:</strong> {{ subcontractor.email }}</p>
+            <p class="mb-1"><strong>Phone:</strong> {{ subcontractor.phone }}</p>
+            <p class="mb-0"><strong>Address:</strong> {{ subcontractor.address }}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h5 class="mb-3">Agreement Stats</h5>
+            <p class="mb-1"><strong>Allocated Value:</strong> ${{ "{:,.2f}".format(subcontractor.contract_value) }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="table-card">
+    <h5 class="mb-4">Issued Work Orders</h5>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>WO No</th>
+                    <th>Project</th>
+                    <th>Description</th>
+                    <th>Contract Amount</th>
+                    <th>Start / End Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wo in work_orders %}
+                <tr>
+                    <td><code>{{ wo.work_order_number }}</code></td>
+                    <td>{{ wo.project_name }}</td>
+                    <td>{{ wo.description }}</td>
+                    <td><strong>${{ "{:,.2f}".format(wo.contract_amount) }}</strong></td>
+                    <td>{{ wo.start_date }} / {{ wo.end_date }}</td>
+                    <td><span class="badge bg-info">{{ wo.status }}</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">No work orders issued yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

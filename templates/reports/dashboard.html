@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Analytics - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Analytics & Reports Desk</h1>
+        <p class="text-muted">Interactive visual analysis charts of operational performance</p>
+    </div>
+    
+    <div class="d-flex gap-2 align-items-center">
+        <!-- Date Filter -->
+        <select id="dateFilter" class="form-select w-auto" onchange="loadAnalyticsData()">
+            <option value="this_month" selected>This Month</option>
+            <option value="today">Today</option>
+            <option value="this_week">This Week</option>
+            <option value="this_year">This Year</option>
+            <option value="all">All Time</option>
+        </select>
+        
+        <!-- Project Filter -->
+        <select id="projectFilter" class="form-select w-auto" onchange="loadAnalyticsData()">
+            <option value="" selected>All Projects</option>
+            {% for p in projects %}
+            <option value="{{ p._id }}">{{ p.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Chart 1: Project Progress -->
+    <div class="col-md-6">
+        <div class="table-card">
+            <h5 class="mb-4">Project Completion Progress (%)</h5>
+            <div style="height: 300px;"><canvas id="progressChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Chart 2: Expenses by Category -->
+    <div class="col-md-6">
+        <div class="table-card">
+            <h5 class="mb-4">Expenses Breakdowns by Category</h5>
+            <div style="height: 300px;"><canvas id="expenseChart"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Chart 3: Material Stock -->
+    <div class="col-md-6">
+        <div class="table-card">
+            <h5 class="mb-4">Material Catalog Current Stock</h5>
+            <div style="height: 300px;"><canvas id="materialsChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Chart 4: Receivables vs Outflows -->
+    <div class="col-md-6">
+        <div class="table-card">
+            <h5 class="mb-4">Enterprise Profitability (Inflow vs Outflow)</h5>
+            <div style="height: 300px;"><canvas id="profitabilityChart"></canvas></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- ChartJS Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    var progressChart, expenseChart, materialsChart, profitabilityChart;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        loadAnalyticsData();
+    });
+
+    function loadAnalyticsData() {
+        var pId = document.getElementById('projectFilter').value;
+        var date = document.getElementById('dateFilter').value;
+        
+        fetch(`/reports/data?project_id=${pId}&date_filter=${date}`)
+            .then(res => res.json())
+            .then(data => {
+                renderProgressChart(data.projects, data.progress);
+                renderExpenseChart(data.expenses_categories.labels, data.expenses_categories.values);
+                renderMaterialsChart(data.materials.labels, data.materials.stocks);
+                renderProfitabilityChart(data.profitability.revenue, data.profitability.expenses);
+            });
+    }
+
+    function renderProgressChart(labels, values) {
+        if (progressChart) progressChart.destroy();
+        var ctx = document.getElementById('progressChart').getContext('2d');
+        progressChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Progress %',
+                    data: values,
+                    backgroundColor: 'rgba(15, 118, 110, 0.7)',
+                    borderColor: '#0f766e',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    function renderExpenseChart(labels, values) {
+        if (expenseChart) expenseChart.destroy();
+        var ctx = document.getElementById('expenseChart').getContext('2d');
+        expenseChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: [
+                        '#0f766e', '#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#a855f7', '#64748b'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    function renderMaterialsChart(labels, values) {
+        if (materialsChart) materialsChart.destroy();
+        var ctx = document.getElementById('materialsChart').getContext('2d');
+        materialsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Stock Levels',
+                    data: values,
+                    borderColor: '#0ea5e9',
+                    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    function renderProfitabilityChart(revenue, expenses) {
+        if (profitabilityChart) profitabilityChart.destroy();
+        var ctx = document.getElementById('profitabilityChart').getContext('2d');
+        profitabilityChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Inward Revenue', 'Outward Expenses'],
+                datasets: [{
+                    data: [revenue, expenses],
+                    backgroundColor: ['#22c55e', '#ef4444']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - OnsitePro{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <h2 class="m-0">Operations Dashboard</h2>
+        <p class="text-muted m-0">Monitor service requests, employee attendance, and active dispatches.</p>
+    </div>
+    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <a href="{{ url_for('jobs.create') }}" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i> Create Service Job</a>
+        <a href="{{ url_for('admin.employees') }}" class="btn btn-outline-secondary ms-2"><i class="bi bi-person-plus"></i> Add Employee</a>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted small text-uppercase">Customers</h6>
+                    <h3 class="mb-0">{{ metrics.total_customers }}</h3>
+                </div>
+                <div class="icon-wrapper icon-primary"><i class="bi bi-people"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted small text-uppercase">Employees</h6>
+                    <h3 class="mb-0">{{ metrics.total_employees }}</h3>
+                </div>
+                <div class="icon-wrapper icon-secondary"><i class="bi bi-person-badge"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted small text-uppercase">Total Jobs</h6>
+                    <h3 class="mb-0">{{ metrics.total_jobs }}</h3>
+                </div>
+                <div class="icon-wrapper icon-success"><i class="bi bi-briefcase"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted small text-uppercase">Today's Jobs</h6>
+                    <h3 class="mb-0">{{ metrics.today_jobs }}</h3>
+                </div>
+                <div class="icon-wrapper icon-warning"><i class="bi bi-calendar-event"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Job status break-down cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3 col-lg-2">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <span class="text-muted small">Pending</span>
+            <h4 class="mb-0 mt-1 text-warning">{{ metrics.pending_jobs }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-lg-2">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <span class="text-muted small">Assigned</span>
+            <h4 class="mb-0 mt-1 text-primary">{{ metrics.assigned_jobs }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-lg-2">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <span class="text-muted small">Accepted</span>
+            <h4 class="mb-0 mt-1 text-info">{{ metrics.accepted_jobs }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-lg-2">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <span class="text-muted small">In Progress</span>
+            <h4 class="mb-0 mt-1 text-success">{{ metrics.inprogress_jobs }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-lg-2">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <span class="text-muted small">On Hold</span>
+            <h4 class="mb-0 mt-1 text-secondary">{{ metrics.onhold_jobs }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-lg-2">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <span class="text-muted small">Completed</span>
+            <h4 class="mb-0 mt-1 text-success-emphasis">{{ metrics.completed_jobs }}</h4>
+        </div>
+    </div>
+</div>
+
+<!-- Maps & Activities Row -->
+<div class="row mb-4">
+    <div class="col-lg-8 mb-4 mb-lg-0">
+        <div class="card border-0 shadow-sm p-4">
+            <h5 class="mb-3"><i class="bi bi-geo-alt me-2 text-danger"></i> Active Job Dispatches Map</h5>
+            <div id="adminMap" class="map-container"></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm p-4" style="height: 100%; max-height: 520px; overflow-y: auto;">
+            <h5 class="mb-3"><i class="bi bi-activity me-2 text-primary"></i> Recent Activity Logs</h5>
+            {% if metrics.recent_activities %}
+                <ul class="list-group list-group-flush">
+                    {% for act in metrics.recent_activities %}
+                        <li class="list-group-item px-0 py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong>{{ act.user_name }}</strong>
+                                <small class="text-muted" style="font-size: 11px;">{{ act.timestamp | datetime }}</small>
+                            </div>
+                            <p class="mb-0 text-muted small mt-1">{{ act.action }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-list-task text-muted" style="font-size: 36px;"></i>
+                    <p class="text-muted mt-2 small">No recent logs recorded.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Center at default location, map will auto fit coordinates bounds
+    var map = initLeafletMap('adminMap', null, null, false);
+    if (map) {
+        var locations = {{ map_locations | tojson }};
+        var bounds = [];
+        
+        locations.forEach(function(loc) {
+            var markerColor = 'blue';
+            if (loc.status === 'in_progress') markerColor = 'green';
+            if (loc.status === 'pending') markerColor = 'orange';
+            if (loc.status === 'on_hold') markerColor = 'red';
+            
+            var marker = L.marker([loc.lat, loc.lng]).addTo(map);
+            marker.bindPopup(`
+                <div style="font-family: 'Inter', sans-serif;">
+                    <h6 class="m-0 mb-1" style="font-size:14px; font-weight:600;">${loc.job_number}</h6>
+                    <p class="m-0 text-muted small" style="font-size:11px; margin-bottom:5px !important;">${loc.title}</p>
+                    <span class="badge text-uppercase bg-secondary mb-2" style="font-size: 10px;">${loc.status}</span><br/>
+                    <a href="/jobs/${loc.id}" class="btn btn-xs btn-primary text-white py-0 px-2 mt-1 d-inline-block" style="font-size:10px; border-radius:4px; text-decoration:none;">Open Ticket</a>
+                </div>
+            `);
+            bounds.push([loc.lat, loc.lng]);
+        });
+        
+        if (bounds.length > 0) {
+            map.fitBounds(bounds);
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Service Request - OnsitePro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h3 class="mb-2"><i class="bi bi-plus-circle me-2 text-primary"></i> Create Service Request</h3>
+            <p class="text-muted">Detail your maintenance requirements. Our support team will create a work job ticket and assign an engineer.</p>
+            <hr class="mt-0 mb-4">
+
+            <form method="POST" action="{{ url_for('customer.create_request') }}">
+                <div class="mb-3">
+                    <label for="title" class="form-label font-weight-bold">Short Title / Subject</label>
+                    <input type="text" name="title" id="title" class="form-control" placeholder="e.g. AC unit is blowing hot air, Kitchen pipe leak" required>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="service_category" class="form-label">Service Category</label>
+                        <select name="service_category" id="service_category" class="form-select" required>
+                            <option value="" disabled selected>Select Category</option>
+                            <option value="HVAC / Heating & Cooling">HVAC / Heating & Cooling</option>
+                            <option value="Plumbing Leak / Repair">Plumbing Leak / Repair</option>
+                            <option value="Electrical Outages / Wiring">Electrical Outages / Wiring</option>
+                            <option value="Appliance Repair">Appliance Repair</option>
+                            <option value="Roofing & Carpentry">Roofing & Carpentry</option>
+                            <option value="Other Maintenance">Other Maintenance</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="preferred_date" class="form-label">Preferred Scheduled Date</label>
+                        <input type="datetime-local" name="preferred_date" id="preferred_date" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Detailed Description of Issue</label>
+                    <textarea name="description" id="description" class="form-control" rows="4" placeholder="Please describe the issue in detail, including brand, model, and any specific error code if possible." required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Service Location</label>
+                    <p class="text-muted small mb-2"><i class="bi bi-info-circle"></i> Type your address or click/drag the pin on the map to set coordinates.</p>
+                    
+                    <div id="requestMap" class="map-container-small mb-3"></div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <input type="text" name="address" id="address" class="form-control" placeholder="123 Main St, City" required>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <input type="text" name="lat" id="lat" class="form-control" readonly placeholder="Latitude">
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <input type="text" name="lng" id="lng" class="form-control" readonly placeholder="Longitude">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('customer.dashboard') }}" class="btn btn-outline-secondary py-2 px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary py-2 px-4">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var defaultLat = 32.7767;
+    var defaultLng = -96.7970;
+    var defaultAddress = "Dallas, TX, USA";
+    
+    // Check if browser geolocation is supported to auto-center map
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+                
+                // Initialize map at user's location
+                var map = initLeafletMap('requestMap', lat, lng, true, '');
+                document.getElementById('lat').value = lat.toFixed(6);
+                document.getElementById('lng').value = lng.toFixed(6);
+                
+                // Fetch reverse geocoded address
+                reverseGeocode(lat, lng, 'address');
+            },
+            function() {
+                // User denied or error: use fallback defaults
+                var map = initLeafletMap('requestMap', defaultLat, defaultLng, true, '');
+                document.getElementById('lat').value = defaultLat.toFixed(6);
+                document.getElementById('lng').value = defaultLng.toFixed(6);
+                document.getElementById('address').value = defaultAddress;
+            }
+        );
+    } else {
+        // Fallback
+        var map = initLeafletMap('requestMap', defaultLat, defaultLng, true, '');
+        document.getElementById('lat').value = defaultLat.toFixed(6);
+        document.getElementById('lng').value = defaultLng.toFixed(6);
+        document.getElementById('address').value = defaultAddress;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper" style="margin: -24px;">
+    <div class="auth-card text-center">
+        <h2 class="mb-2">Construction ERP</h2>
+        <p class="text-muted mb-4">Enterprise Project & Site Management Portal</p>
+        
+        <!-- Flask Flash Alerts -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} py-2 text-start" role="alert" style="font-size: 14px;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.login') }}" class="text-start">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" name="email" id="email" class="form-control" placeholder="name@company.com" required autocomplete="username">
+            </div>
+            
+            <div class="mb-4">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 py-3 mb-3">Sign In</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

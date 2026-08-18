@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Job Detail - OnsitePro{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <h2 class="m-0">Job ticket: {{ job.job_number }}</h2>
+        <p class="text-muted m-0">Assigned Dispatch Ticket Details</p>
+    </div>
+    <div class="col-md-6 text-md-end mt-2 mt-md-0">
+        <a href="{{ url_for('employee.dashboard') }}" class="btn btn-outline-secondary btn-sm">Back to Console</a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Details, Check-in and logs -->
+    <div class="col-lg-8 mb-4">
+        <!-- Accept / Decline Callout -->
+        {% if job.status == 'assigned' %}
+            <div class="card border-primary bg-primary-subtle rounded-3 mb-4 p-4 shadow-sm text-center">
+                <h5 class="text-primary-emphasis mb-2 font-weight-bold">Acknowledge Job Assignment</h5>
+                <p class="text-muted">Please accept this service job to confirm schedule availability, or decline if unavailable.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('employee.accept_job', job_id=job._id) }}" class="btn btn-primary px-4 py-2">Accept Job</a>
+                    <a href="{{ url_for('employee.decline_job', job_id=job._id) }}" class="btn btn-outline-danger px-4 py-2" onclick="return confirm('Confirm declining this job?');">Decline Job</a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Geolocation Check-In Panel -->
+        {% if job.status in ['accepted', 'in_progress', 'on_hold'] %}
+            <div class="card border-0 shadow-sm p-4 mb-4">
+                <h5 class="mb-3"><i class="bi bi-clock-history me-2 text-success"></i> Attendance & Dispatch Site Log</h5>
+                {% if active_attendance %}
+                    <div class="p-3 border rounded border-success bg-success-subtle mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-grow text-success me-3" role="status"></div>
+                            <div>
+                                <strong>Currently Checked-In</strong><br/>
+                                <small class="text-success-emphasis">Timer running since {{ active_attendance.check_in_time | datetime }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="checkoutBtn" class="btn btn-danger w-100 py-3 font-weight-bold" onclick="trackAttendance('{{ job._id }}', 'checkout')">
+                        <i class="bi bi-box-arrow-right me-2"></i> Check-Out (Complete Session)
+                    </button>
+                {% else %}
+                    <div class="p-3 border rounded bg-light text-muted mb-3">
+                        <i class="bi bi-info-circle me-1"></i> You must check in when you arrive at the customer location to start billing hours and tracking work.
+                    </div>
+                    <button type="button" id="checkinBtn" class="btn btn-success w-100 py-3 font-weight-bold" onclick="trackAttendance('{{ job._id }}', 'checkin')">
+                        <i class="bi bi-geo-alt me-2"></i> Check-In (Arrived at Job Site)
+                    </button>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Job details and specs -->
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-info-circle me-2 text-primary"></i> Service Details</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="text-muted small">Job Subject / Title</label>
+                    <h5 class="text-dark font-weight-bold">{{ job.title }}</h5>
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="text-muted small">Priority</label>
+                    <div>
+                        {% if job.priority == 'urgent' %}
+                            <span class="badge bg-danger text-uppercase">Urgent</span>
+                        {% elif job.priority == 'high' %}
+                            <span class="badge bg-warning text-dark text-uppercase">High</span>
+                        {% else %}
+                            <span class="badge bg-info text-dark text-uppercase">{{ job.priority }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="text-muted small">Current Status</label>
+                    <div>
+                        <span class="badge bg-secondary text-uppercase">{{ job.status }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6 col-6">
+                    <label class="text-muted small">Scheduled Time</label>
+                    <div><strong>{{ job.scheduled_date | datetime }}</strong></div>
+                </div>
+                <div class="col-md-6 col-6">
+                    <label class="text-muted small">Target Due Date</label>
+                    <div><strong>{{ job.due_date | datetime }}</strong></div>
+                </div>
+                <div class="col-md-12">
+                    <label class="text-muted small">Service Description</label>
+                    <p class="text-dark-emphasis mt-1 mb-0" style="white-space: pre-wrap;">{{ job.description }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Updates Log / Timeline -->
+        <div class="card border-0 shadow-sm p-4">
+            <h5 class="mb-4"><i class="bi bi-clock me-2 text-secondary"></i> Job Progress Updates History</h5>
+            {% if job.updates %}
+                <div class="timeline" style="border-left: 2px solid var(--border-color); padding-left: 20px; margin-left: 10px;">
+                    {% for up in job.updates %}
+                        <div class="position-relative mb-4">
+                            <!-- Bullet -->
+                            <div class="position-absolute rounded-circle bg-white border border-primary" style="width: 12px; height: 12px; left: -27px; top: 6px;"></div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="font-weight-bold text-dark">{{ up.by_name }} updated status to <span class="badge bg-light text-dark border">{{ up.status.upper() }}</span></span>
+                                <small class="text-muted">{{ up.updated_at | datetime }}</small>
+                            </div>
+                            {% if up.notes %}
+                                <p class="text-muted mt-2 mb-2 p-2 border bg-light-subtle rounded small">{{ up.notes }}</p>
+                            {% endif %}
+                            
+                            {% if up.attachments %}
+                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                    {% for att in up.attachments %}
+                                        <a href="{{ att.url }}" target="_blank" class="btn btn-sm btn-outline-secondary py-1 px-2 text-truncate" style="max-width: 200px;">
+                                            <i class="bi bi-paperclip"></i> {{ att.filename }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-muted">No status logs posted yet.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Map, Customer info, submit status updates -->
+    <div class="col-lg-4">
+        <!-- Customer Info -->
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-person me-2 text-primary"></i> Customer Details</h5>
+            <h6 class="font-weight-bold text-dark mb-1">{{ job.customer_name }}</h6>
+            <p class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> {{ job.customer_address }}</p>
+            <p class="text-muted small mb-0"><i class="bi bi-telephone"></i> <a href="tel:{{ job.customer_phone }}" class="text-decoration-none">{{ job.customer_phone }}</a></p>
+            <p class="text-muted small mb-0"><i class="bi bi-envelope"></i> <a href="mailto:{{ job.customer_email }}" class="text-decoration-none">{{ job.customer_email }}</a></p>
+        </div>
+
+        <!-- Navigation Map -->
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-map me-2 text-danger"></i> Site Location</h5>
+            <div id="jobDetailMap" class="map-container-small mb-3"></div>
+            <a href="https://www.openstreetmap.org/?mlat={{ job.location.lat }}&mlon={{ job.location.lng }}#map=16/{{ job.location.lat }}/{{ job.location.lng }}" target="_blank" class="btn btn-outline-secondary btn-sm w-100">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Open in OpenStreetMap
+            </a>
+        </div>
+
+        <!-- Update Job Status (Notes/Attachment Upload) -->
+        {% if job.status in ['accepted', 'in_progress', 'on_hold'] %}
+            <div class="card border-0 shadow-sm p-4">
+                <h5 class="mb-3"><i class="bi bi-journal-text me-2 text-info"></i> Post Work Log Update</h5>
+                <form method="POST" action="{{ url_for('employee.update_job', job_id=job._id) }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Update Job Status</label>
+                        <select name="status" id="status" class="form-select" required>
+                            <option value="accepted" {% if job.status == 'accepted' %}selected{% endif %}>Accepted</option>
+                            <option value="in_progress" {% if job.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                            <option value="on_hold" {% if job.status == 'on_hold' %}selected{% endif %}>On Hold / Waiting for Parts</option>
+                            <option value="completed" {% if job.status == 'completed' %}selected{% endif %}>Completed (Job Finished)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Work Progress Notes</label>
+                        <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Explain details about repairs done, wait times, or instructions..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="attachments" class="form-label">Upload Proof (Images/Docs)</label>
+                        <input type="file" name="attachments" id="attachments" class="form-control" multiple accept="image/*,application/pdf">
+                        <div class="form-text">Attach photo of completed repairs, signed sheets, etc.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">Submit Work Log</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var lat = {{ job.location.lat or 12.9716 }};
+    var lng = {{ job.location.lng or 77.5946 }};
+    var map = initLeafletMap('jobDetailMap', lat, lng, false);
+});
+</script>
+{% endblock %}

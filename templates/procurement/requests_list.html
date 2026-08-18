@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Material Requests - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Material Requisitions (Indents)</h1>
+        <p class="text-muted">Review and process material requests from sites</p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if session.role in ['super_admin', 'admin', 'site_engineer'] %}
+        <a href="{{ url_for('procurement.add_request') }}" class="btn btn-primary"><i class="bi bi-cart-plus"></i> Create Indent Request</a>
+        {% endif %}
+        {% if session.role in ['super_admin', 'admin'] %}
+        <a href="{{ url_for('procurement.rfqs_list') }}" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-text"></i> RFQs</a>
+        <a href="{{ url_for('procurement.po_list') }}" class="btn btn-outline-info"><i class="bi bi-send"></i> Purchase Orders</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Request No</th>
+                    <th>Requested By</th>
+                    <th>Project / Site</th>
+                    <th>Required Date</th>
+                    <th>Items Count</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in requests %}
+                <tr>
+                    <td><code>{{ r.request_number }}</code></td>
+                    <td><strong>{{ r.requested_by_name }}</strong></td>
+                    <td>{{ r.project_name }} / {{ r.site_name }}</td>
+                    <td>{{ r.required_date }}</td>
+                    <td>{{ r.items | length }} items</td>
+                    <td>
+                        <span class="badge bg-{% if r.status == 'approved' %}success{% elif r.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                            {{ r.status.upper() }}
+                        </span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#reqCollapse_{{ r._id }}">View Items</button>
+                    </td>
+                </tr>
+                <!-- Collapse row -->
+                <tr class="collapse-row">
+                    <td colspan="7" class="p-0 border-0">
+                        <div class="collapse" id="reqCollapse_{{ r._id }}">
+                            <div class="p-4 bg-light">
+                                <h6>Items Requested:</h6>
+                                <ul class="mb-3">
+                                    {% for item in r.items %}
+                                    <li><strong>{{ item.name }}</strong> - Qty: {{ item.quantity }}</li>
+                                    {% endfor %}
+                                </ul>
+                                
+                                <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                                    <span>Date Requested: {{ r.created_at | datetime }}</span>
+                                    <div>
+                                        {% if r.status == 'pending' and session.role in ['super_admin', 'admin', 'project_manager'] %}
+                                        <form method="POST" action="{{ url_for('procurement.review_request', request_id=r._id) }}" class="d-inline">
+                                            <button type="submit" name="action" value="approve" class="btn btn-sm btn-success me-2">Approve Request</button>
+                                            <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
+                                        </form>
+                                        {% elif r.status == 'approved' and session.role in ['super_admin', 'admin'] %}
+                                        <a href="{{ url_for('procurement.create_rfq', request_id=r._id) }}" class="btn btn-sm btn-primary">Generate RFQ</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">No material requests found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

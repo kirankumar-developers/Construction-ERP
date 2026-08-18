@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Budget Tracking - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Project Budgets</h1>
+        <p class="text-muted">Monitor Category allocations vs Actual Expenditures</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for p in projects %}
+    <div class="col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h5 class="mb-0">{{ p.name }}</h5>
+                    <span class="badge bg-secondary mt-1">Code: {{ p.project_code }}</span>
+                </div>
+                {% if p.overrun %}
+                <span class="badge bg-danger p-2"><i class="bi bi-exclamation-triangle"></i> OVERRUN ALERT</span>
+                {% endif %}
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-4">
+                    <small class="text-muted d-block">Allocated Budget:</small>
+                    <strong>${{ "{:,.2f}".format(p.total_budget) }}</strong>
+                </div>
+                <div class="col-4">
+                    <small class="text-muted d-block">Actual Expenses:</small>
+                    <strong class="text-danger">${{ "{:,.2f}".format(p.total_actual) }}</strong>
+                </div>
+                <div class="col-4">
+                    <small class="text-muted d-block">Cost Variance:</small>
+                    <strong class="{% if p.variance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        ${{ "{:,.2f}".format(p.variance) }}
+                    </strong>
+                </div>
+            </div>
+            
+            <h6 class="border-top pt-2 mb-2">Category Breakdowns</h6>
+            <ul class="list-unstyled mb-4">
+                {% for cat, amt in p.budget_categories.items() %}
+                <li class="d-flex justify-content-between small py-1">
+                    <span>{{ cat }}:</span>
+                    <span>
+                        Budget: <strong>${{ "{:,.2f}".format(amt) }}</strong> | 
+                        Actual: <strong class="text-danger">${{ "{:,.2f}".format(p.actual_categories.get(cat, 0.0)) }}</strong>
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+            
+            {% if session.role in ['super_admin', 'admin', 'project_manager'] %}
+            <a href="{{ url_for('budget.manage', project_id=p._id) }}" class="btn btn-sm btn-outline-primary w-100">Manage Category Allocations</a>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-muted">No projects found.</div>
+    {% endfor %}
+</div>
+{% endblock %}

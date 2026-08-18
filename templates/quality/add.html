@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Log Inspection - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Log Quality Audit Inspection</h1>
+    <p class="text-muted">Fill checklists and upload audit proofs</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="table-card">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="project_id" class="form-label">Project</label>
+                        <select name="project_id" id="project_id" class="form-select" required>
+                            <option value="">Select Project</option>
+                            {% for p in projects %}
+                            <option value="{{ p._id }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="site_id" class="form-label">Site Assignment</label>
+                        <select name="site_id" id="site_id" class="form-select" required>
+                            <option value="">Select Site</option>
+                            {% for s in sites %}
+                            <option value="{{ s._id }}">{{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="inspection_date" class="form-label">Inspection Date</label>
+                        <input type="date" name="inspection_date" id="inspection_date" class="form-control" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="photo" class="form-label">Attach Audit Photo proof</label>
+                        <input type="file" name="photo" id="photo" class="form-control">
+                    </div>
+                </div>
+                
+                <h5 class="mb-3 border-bottom pb-2">Checklist Audited Items</h5>
+                <div id="checklistContainer">
+                    <div class="row g-2 mb-3 checklist-row">
+                        <div class="col-md-7">
+                            <input type="text" name="checklist_item[]" class="form-control" placeholder="Checklist item (e.g. Columns alignment / Safety nets)" required>
+                        </div>
+                        <div class="col-md-4">
+                            <select name="checklist_status[]" class="form-select">
+                                <option value="Pass">Pass</option>
+                                <option value="Fail">Fail</option>
+                                <option value="Needs Correction">Needs Correction</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-outline-danger w-100" onclick="removeChecklistRow(this)"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn btn-outline-secondary btn-sm mb-4" onclick="addChecklistRow()"><i class="bi bi-plus"></i> Add Checklist Row</button>
+                
+                <div class="mb-4">
+                    <label for="remarks" class="form-label">Audit Remarks / Corrective Actions</label>
+                    <textarea name="remarks" id="remarks" class="form-control" rows="3"></textarea>
+                </div>
+                
+                <div class="text-end">
+                    <a href="{{ url_for('quality.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Submit Inspection Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function addChecklistRow() {
+        var container = document.getElementById('checklistContainer');
+        var row = document.createElement('div');
+        row.className = 'row g-2 mb-3 checklist-row';
+        row.innerHTML = `
+            <div class="col-md-7">
+                <input type="text" name="checklist_item[]" class="form-control" placeholder="Checklist item" required>
+            </div>
+            <div class="col-md-4">
+                <select name="checklist_status[]" class="form-select">
+                    <option value="Pass">Pass</option>
+                    <option value="Fail">Fail</option>
+                    <option value="Needs Correction">Needs Correction</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger w-100" onclick="removeChecklistRow(this)"><i class="bi bi-trash"></i></button>
+            </div>
+        `;
+        container.appendChild(row);
+    }
+    
+    function removeChecklistRow(button) {
+        button.closest('.checklist-row').remove();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}BOQ Details - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">BOQ Details: {{ boq.boq_number }}</h1>
+        <p class="text-muted">Project: {{ boq.project_name }} | Category: {{ boq.category }}</p>
+    </div>
+    <a href="{{ url_for('boq.index') }}" class="btn btn-outline-secondary">Back to List</a>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-primary">
+                <i class="bi bi-calculator"></i>
+            </div>
+            <div class="text-muted">Total BOQ Estimate</div>
+            <h3 class="mb-0">${{ "{:,.2f}".format(boq.total_amount) }}</h3>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-danger">
+                <i class="bi bi-cash-coin"></i>
+            </div>
+            <div class="text-muted">Actual Consumed</div>
+            <h3 class="mb-0 text-danger">${{ "{:,.2f}".format(actual_cost) }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-success">
+                <i class="bi bi-piggy-bank"></i>
+            </div>
+            <div class="text-muted">Remaining Balance</div>
+            <h3 class="mb-0 text-success">${{ "{:,.2f}".format(remaining) }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="table-card">
+    <h5 class="mb-4">Itemized Bill Rates</h5>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Unit</th>
+                    <th>Quantity</th>
+                    <th>Rate</th>
+                    <th>Total Estimate</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in boq.items %}
+                <tr>
+                    <td><strong>{{ item.description }}</strong></td>
+                    <td>{{ item.unit }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ "{:,.2f}".format(item.rate) }}</td>
+                    <td><strong>${{ "{:,.2f}".format(item.amount) }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

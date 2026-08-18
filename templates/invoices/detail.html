@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice Detail #{{ invoice.invoice_number }} - OnsitePro{% endblock %}
+
+{% block extra_css %}
+<style>
+@media print {
+    #sidebar, .navbar-custom, .btn-print-hide {
+        display: none !important;
+    }
+    #content {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4 btn-print-hide">
+    <div class="col-md-6">
+        <h2 class="m-0">Invoice Ticket Details</h2>
+        <p class="text-muted m-0">Reference number: {{ invoice.invoice_number }}</p>
+    </div>
+    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        {% if session.role == 'admin' %}
+            <a href="{{ url_for('invoices.list_invoices') }}" class="btn btn-outline-secondary btn-sm">Back to Invoices</a>
+        {% else %}
+            <a href="{{ url_for('customer.dashboard') }}" class="btn btn-outline-secondary btn-sm">Back to Portal</a>
+        {% endif %}
+        <button class="btn btn-primary btn-sm ms-2" onclick="window.print()"><i class="bi bi-printer"></i> Print Invoice</button>
+        {% if invoice.status == 'unpaid' and session.role == 'customer' %}
+            <a href="{{ url_for('customer.pay_invoice', invoice_id=invoice._id) }}" class="btn btn-success btn-sm ms-2"><i class="bi bi-wallet2"></i> Pay Now</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-9 mx-auto">
+        <div class="card border-0 shadow-sm p-5 rounded-4">
+            <!-- Receipt Header -->
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <h2 class="text-teal font-weight-bold" style="color: #0f766e;">OnsitePro Inc.</h2>
+                    <p class="text-muted small">
+                        100 Operational Blvd<br/>
+                        Tech City, TC 10010<br/>
+                        support@onsitepro.com
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <h3 class="text-uppercase text-muted">Invoice</h3>
+                    <div class="mt-2">
+                        <strong>Invoice #:</strong> {{ invoice.invoice_number }}<br/>
+                        <strong>Date Issued:</strong> {{ invoice.created_at | datetime }}<br/>
+                        <strong>Service Ticket:</strong> {{ invoice.job_number }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Addresses -->
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <h6 class="text-uppercase text-muted small">Billed To:</h6>
+                    <h5 class="font-weight-bold text-dark mb-1">{{ invoice.customer_name }}</h5>
+                    <p class="text-muted small mb-0">
+                        {{ invoice.customer_address }}<br/>
+                        {{ invoice.customer_city }}<br/>
+                        Phone: {{ invoice.customer_phone }}<br/>
+                        Email: {{ invoice.customer_email }}
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <h6 class="text-uppercase text-muted small">Payment Status:</h6>
+                    <div>
+                        {% if invoice.status == 'paid' %}
+                            <span class="badge bg-success py-2 px-3 fs-6">PAID</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark py-2 px-3 fs-6">UNPAID / OUTSTANDING</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice items -->
+            <h5 class="border-bottom pb-2">Line Items Summary</h5>
+            <div class="table-responsive mb-4">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-center" style="width: 100px;">Quantity</th>
+                            <th class="text-end" style="width: 150px;">Unit Price</th>
+                            <th class="text-end" style="width: 150px;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in invoice.items %}
+                            <tr>
+                                <td>{{ item.description }}</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">${{ "%.2f" | format(item.unit_price) }}</td>
+                                <td class="text-end">${{ "%.2f" | format(item.total) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Invoice math calculations totals -->
+            <div class="row justify-content-end">
+                <div class="col-md-5">
+                    <div class="card p-3 border-0 bg-light">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal:</span>
+                            <span class="font-weight-bold">${{ "%.2f" | format(invoice.subtotal) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Sales Tax (10%):</span>
+                            <span class="font-weight-bold">${{ "%.2f" | format(invoice.tax) }}</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-dark font-weight-bold">Grand Total Due:</span>
+                            <h4 class="mb-0 text-primary font-weight-bold">${{ "%.2f" | format(invoice.total) }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment details logs -->
+            {% if invoice.payments %}
+                <h5 class="mt-5 border-bottom pb-2">Payment Confirmation History</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm text-muted">
+                        <thead>
+                            <tr>
+                                <th>Date Auth</th>
+                                <th>Billing Method</th>
+                                <th>Transaction Status</th>
+                                <th class="text-end">Amount Cleared</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pay in invoice.payments %}
+                                <tr>
+                                    <td>{{ pay.payment_date | datetime }}</td>
+                                    <td class="text-uppercase">{{ pay.payment_method }}</td>
+                                    <td>
+                                        <span class="badge bg-success-subtle text-success">SUCCESS</span>
+                                    </td>
+                                    <td class="text-end">${{ "%.2f" | format(pay.amount) }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            
+            <div class="text-center text-muted small mt-5 pt-4 border-top">
+                Thank you for choosing OnsitePro! For queries, contact support@onsitepro.com.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Employee Dashboard - OnsitePro{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-8">
+        <h2 class="m-0">Worker Console</h2>
+        <p class="text-muted m-0">Review your daily schedule, check-in to locations, and update work logs.</p>
+    </div>
+</div>
+
+<!-- Active Check-In Alerts -->
+{% if active_attendance and active_job %}
+    <div class="alert alert-success border-success rounded-3 mb-4 p-4 shadow-sm" role="alert">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div class="d-flex align-items-center mb-2 mb-md-0">
+                <div class="spinner-grow text-success me-3" role="status" style="width: 24px; height: 24px;"></div>
+                <div>
+                    <h5 class="alert-heading mb-1 font-weight-bold">Active Attendance Session</h5>
+                    <p class="mb-0 text-success-emphasis">Checked in to job <strong>{{ active_job.job_number }}</strong> since {{ active_attendance.check_in_time | datetime }}.</p>
+                </div>
+            </div>
+            <a href="{{ url_for('employee.job_detail', job_id=active_job._id) }}" class="btn btn-success"><i class="bi bi-play-circle me-1"></i> Open Active Ticket</a>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-secondary rounded-3 mb-4 p-4 shadow-sm" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-geo-alt-fill text-muted me-3" style="font-size: 28px;"></i>
+            <div>
+                <h6 class="alert-heading mb-1 text-dark font-weight-bold">No Active Check-in</h6>
+                <p class="mb-0 text-muted">You are not checked in to any job. Select an assigned job below to start your work timer.</p>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Stats summary cards for worker -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm p-3 text-center">
+            <span class="text-muted small">Assigned / Accepted</span>
+            <h3 class="mb-0 mt-1" style="color: #0ea5e9;">
+                {% set assigned_list = jobs | selectattr('status', 'in', ['assigned', 'accepted']) | list %}
+                {{ assigned_list | length }}
+            </h3>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm p-3 text-center">
+            <span class="text-muted small">In Progress</span>
+            <h3 class="mb-0 mt-1 text-success">
+                {% set ip_list = jobs | selectattr('status', 'equalto', 'in_progress') | list %}
+                {{ ip_list | length }}
+            </h3>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm p-3 text-center">
+            <span class="text-muted small">On Hold</span>
+            <h3 class="mb-0 mt-1 text-warning">
+                {% set oh_list = jobs | selectattr('status', 'equalto', 'on_hold') | list %}
+                {{ oh_list | length }}
+            </h3>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm p-3 text-center">
+            <span class="text-muted small">Completed</span>
+            <h3 class="mb-0 mt-1 text-success-emphasis">
+                {% set comp_list = jobs | selectattr('status', 'equalto', 'completed') | list %}
+                {{ comp_list | length }}
+            </h3>
+        </div>
+    </div>
+</div>
+
+<!-- Assigned Jobs Directory -->
+<div class="card border-0 shadow-sm p-4">
+    <h5 class="mb-3"><i class="bi bi-list-task me-2 text-primary"></i> My Assigned Service Tickets</h5>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Job ID</th>
+                    <th>Customer Name</th>
+                    <th>Job Title</th>
+                    <th>Schedule Due</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if jobs %}
+                    {% for job in jobs %}
+                        <tr>
+                            <td><strong>{{ job.job_number }}</strong></td>
+                            <td>{{ job.customer_name }}</td>
+                            <td>{{ job.title }}</td>
+                            <td>{{ job.due_date | datetime }}</td>
+                            <td>
+                                {% if job.status == 'assigned' %}
+                                    <span class="badge badge-status badge-assigned">Assigned</span>
+                                {% elif job.status == 'accepted' %}
+                                    <span class="badge badge-status badge-accepted">Accepted</span>
+                                {% elif job.status == 'in_progress' %}
+                                    <span class="badge badge-status badge-inprogress">In Progress</span>
+                                {% elif job.status == 'on_hold' %}
+                                    <span class="badge badge-status badge-onhold">On Hold</span>
+                                {% elif job.status == 'completed' %}
+                                    <span class="badge badge-status badge-completed">Completed</span>
+                                {% else %}
+                                    <span class="badge badge-status badge-cancelled">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if job.priority == 'urgent' %}
+                                    <span class="badge bg-danger">Urgent</span>
+                                {% elif job.priority == 'high' %}
+                                    <span class="badge bg-warning text-dark">High</span>
+                                {% elif job.priority == 'medium' %}
+                                    <span class="badge bg-info text-dark">Medium</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Low</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('employee.job_detail', job_id=job._id) }}" class="btn btn-sm btn-primary py-1 px-3">
+                                    Open Ticket
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">You are not currently assigned to any service tickets.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

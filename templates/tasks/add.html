@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Create Task - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Create Task</h1>
+    <p class="text-muted">Create a new activity assignment</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="table-card">
+            <form method="POST" action="{{ url_for('tasks.add') }}">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label for="title" class="form-label">Task Title</label>
+                        <input type="text" name="title" id="title" class="form-control" placeholder="Concrete Casting / Piping Install" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="project_id" class="form-label">Project</label>
+                        <select name="project_id" id="project_id" class="form-select" required>
+                            <option value="">Select Project</option>
+                            {% for p in projects %}
+                            <option value="{{ p._id }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="site_id" class="form-label">Site Assignment</label>
+                        <select name="site_id" id="site_id" class="form-select" required>
+                            <option value="">Select Site</option>
+                            {% for s in sites %}
+                            <option value="{{ s._id }}">{{ s.name }} ({{ s.site_code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" name="start_date" id="start_date" class="form-control">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="due_date" class="form-label">Due Date</label>
+                        <input type="date" name="due_date" id="due_date" class="form-control">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="priority" class="form-label">Task Priority</label>
+                        <select name="priority" id="priority" class="form-select">
+                            {% for p in TaskPriority.ALL %}
+                            <option value="{{ p }}">{{ p.title() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="parent_task_id" class="form-label">Parent Task (for Subtasks)</label>
+                        <select name="parent_task_id" id="parent_task_id" class="form-select">
+                            <option value="">None (Main Task)</option>
+                            {% for pt in parent_tasks %}
+                            <option value="{{ pt._id }}">{{ pt.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="assigned_employee_ids" class="form-label">Assigned Staff / Engineers (Select multiple)</label>
+                        <select name="assigned_employee_ids" id="assigned_employee_ids" class="form-select" multiple style="height: 120px;">
+                            {% for e in employees %}
+                            <option value="{{ e._id }}">{{ e.name }} ({{ e.role }})</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple.</small>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="description" class="form-label">Scope Description</label>
+                        <textarea name="description" id="description" class="form-control" rows="3" placeholder="Task execution details"></textarea>
+                    </div>
+                    
+                    <div class="col-md-12 text-end">
+                        <a href="{{ url_for('tasks.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create Task</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

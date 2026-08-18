@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Employees - OnsitePro{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <h2 class="m-0"><i class="bi bi-people me-2"></i> Employee Directory</h2>
+        <p class="text-muted m-0">Create new staff logins, update designations, and deactivate accounts.</p>
+    </div>
+    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+            <i class="bi bi-person-plus-fill me-2"></i> Add Employee
+        </button>
+    </div>
+</div>
+
+<!-- Employees Directory Card -->
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Emp ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if employees %}
+                    {% for emp in employees %}
+                        <tr>
+                            <td><strong>{{ emp.employee_id }}</strong></td>
+                            <td>{{ emp.name }}</td>
+                            <td>{{ emp.email }}</td>
+                            <td>{{ emp.department }}</td>
+                            <td>{{ emp.designation }}</td>
+                            <td>{{ emp.phone }}</td>
+                            <td>
+                                {% if emp.current_status == 'active' and emp.is_active %}
+                                    <span class="badge bg-success-subtle text-success">Active</span>
+                                {% elif emp.current_status == 'on_job' %}
+                                    <span class="badge bg-info-subtle text-info">On Job</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editEmployeeModal{{ emp._id }}">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <a href="{{ url_for('admin.delete_employee_route', emp_id=emp._id) }}" 
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Deactivate this employee login?');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- Edit Modal -->
+                        <div class="modal fade" id="editEmployeeModal{{ emp._id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form method="POST" action="{{ url_for('admin.edit_employee', emp_id=emp._id) }}">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Employee Profile</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Full Name</label>
+                                                <input type="text" class="form-control" value="{{ emp.name }}" disabled>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Department</label>
+                                                <input type="text" name="department" class="form-control" value="{{ emp.department }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Designation</label>
+                                                <input type="text" name="designation" class="form-control" value="{{ emp.designation }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Phone</label>
+                                                <input type="text" name="phone" class="form-control" value="{{ emp.phone }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Street Address</label>
+                                                <textarea name="address" class="form-control" rows="2" required>{{ emp.address }}</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Account Status</label>
+                                                <select name="is_active" class="form-select">
+                                                    <option value="true" {% if emp.is_active %}selected{% endif %}>Active</option>
+                                                    <option value="false" {% if not emp.is_active %}selected{% endif %}>Inactive/Deactivated</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">No employees registered yet.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Employee Modal -->
+<div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.employees') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEmployeeModalLabel">Register New Staff Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" name="name" id="name" class="form-control" placeholder="Jane Smith" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" name="email" id="email" class="form-control" placeholder="jane@company.com" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" name="password" id="password" class="form-control" placeholder="Min 6 characters" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="text" name="phone" id="phone" class="form-control" placeholder="+1..." required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="department" class="form-label">Department</label>
+                            <input type="text" name="department" id="department" class="form-control" placeholder="Electrical, Plumbing, HVAC" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="designation" class="form-label">Designation</label>
+                            <input type="text" name="designation" id="designation" class="form-control" placeholder="Senior Field Tech" required>
+                        </div>
+                        <div class="col-12">
+                            <label for="address" class="form-label">Home / Base Street Address</label>
+                            <textarea name="address" id="address" class="form-control" rows="2" placeholder="Street, City, Zip" required></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create Employee Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

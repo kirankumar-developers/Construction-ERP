@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Labour Portal - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Labour Portal</h1>
+        <p class="text-muted">Welcome, {{ session.name }} (ID: {{ labour.labour_id if labour else '' }})</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-primary">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <div class="text-muted">Category / Wage</div>
+            <h3 class="mb-0">{{ labour.category if labour else 'Helper' }} / ${{ "{:,.2f}".format(labour.daily_wage if labour else 0.0) }} Daily</h3>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-success">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="text-muted">Status</div>
+            <h3 class="mb-0 text-success">{{ labour.status.upper() if labour else 'ACTIVE' }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-12">
+        <div class="table-card">
+            <h5 class="mb-4">My Attendance & Wages History</h5>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Hours Worked</th>
+                            <th>Overtime (Hrs)</th>
+                            <th>Estimated Earnings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in attendance_logs %}
+                        <tr>
+                            <td>{{ log.date }}</td>
+                            <td><span class="badge bg-{% if log.status == 'Present' %}success{% else %}warning{% endif %}">{{ log.status }}</span></td>
+                            <td>{{ log.working_hours }}</td>
+                            <td>{{ log.overtime }}</td>
+                            <td><strong>${{ "{:,.2f}".format(log.wage_earned or 0.0) }}</strong></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No attendance logs found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Documents - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Document Management</h1>
+        <p class="text-muted">Access CAD drawings, contracts, BOQs, and site reports</p>
+    </div>
+    <a href="{{ url_for('documents.upload') }}" class="btn btn-primary"><i class="bi bi-cloud-arrow-up"></i> Upload Document</a>
+</div>
+
+<div class="table-card mb-4">
+    <h5 class="mb-3">Filter Documents</h5>
+    <form method="GET" action="{{ url_for('documents.index') }}" class="row g-2">
+        <div class="col-md-3">
+            <select name="project_id" class="form-select">
+                <option value="">All Projects</option>
+                {% for p in projects %}
+                <option value="{{ p._id }}" {% if selected_project == p._id %}selected{% endif %}>{{ p.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="site_id" class="form-select">
+                <option value="">All Sites</option>
+                {% for s in sites %}
+                <option value="{{ s._id }}" {% if selected_site == s._id %}selected{% endif %}>{{ s.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                {% for cat in DocumentCategory.ALL %}
+                <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat.upper().replace('_', ' ') }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">Filter Documents</button>
+        </div>
+    </form>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Category</th>
+                    <th>Project</th>
+                    <th>Site</th>
+                    <th>Uploaded By</th>
+                    <th>Upload Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr>
+                    <td>
+                        <i class="bi bi-file-earmark-pdf fs-4 text-danger me-2"></i>
+                        <strong><a href="{{ doc.file_path }}" target="_blank" class="text-decoration-none">{{ doc.name }}</a></strong>
+                    </td>
+                    <td><span class="badge bg-secondary">{{ doc.category.upper().replace('_', ' ') }}</span></td>
+                    <td>{{ doc.project_name }}</td>
+                    <td>{{ doc.site_name }}</td>
+                    <td>{{ doc.uploader_name }}</td>
+                    <td>{{ doc.upload_date | datetime }}</td>
+                    <td>
+                        <a href="{{ doc.file_path }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Download</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">No documents found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

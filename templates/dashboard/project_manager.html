@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Project Manager Dashboard - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Project Manager Dashboard</h1>
+        <p class="text-muted">Overview of your assigned projects</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-primary">
+                <i class="bi bi-folder"></i>
+            </div>
+            <div class="text-muted">Assigned Projects</div>
+            <h3 class="mb-0">{{ projects_count }}</h3>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-danger">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="text-muted">Delayed Tasks</div>
+            <h3 class="mb-0">{{ delayed_tasks }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div class="text-muted">Pending Issues</div>
+            <h3 class="mb-0">{{ pending_issues }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-success">
+                <i class="bi bi-journal-check"></i>
+            </div>
+            <div class="text-muted">Pending DPR Reviews</div>
+            <h3 class="mb-0">{{ pending_dprs }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-8">
+        <div class="table-card">
+            <h5 class="mb-4">Project Progress List</h5>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Project Name</th>
+                            <th>Progress</th>
+                            <th>Budget</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in assigned_projects %}
+                        <tr>
+                            <td><code>{{ p.project_code }}</code></td>
+                            <td><strong>{{ p.name }}</strong></td>
+                            <td>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ p.progress }}%" aria-valuenow="{{ p.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <small class="text-muted mt-1 d-block">{{ p.progress }}% Complete</small>
+                            </td>
+                            <td>${{ "{:,.2f}".format(p.budget) }}</td>
+                            <td><span class="badge bg-secondary">{{ p.status }}</span></td>
+                            <td><a href="{{ url_for('projects.view', project_id=p._id) }}" class="btn btn-sm btn-outline-primary">View Detail</a></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No assigned projects found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h5 class="mb-4">Financial Status</h5>
+            <div class="d-flex justify-content-between mb-2">
+                <span>Allocated Budget:</span>
+                <strong>${{ "{:,.2f}".format(total_budget) }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span>Actual Expenses:</span>
+                <strong class="text-danger">${{ "{:,.2f}".format(actual_cost) }}</strong>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between">
+                <span>Variance:</span>
+                <strong class="{% if total_budget - actual_cost >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    ${{ "{:,.2f}".format(total_budget - actual_cost) }}
+                </strong>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

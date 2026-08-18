@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Pay Invoice - OnsitePro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h3 class="mb-2 text-center"><i class="bi bi-credit-card me-2 text-primary"></i> Settle Billing Invoice</h3>
+            <p class="text-muted text-center">Submit a mock payment. Once confirmed, your invoice status updates automatically.</p>
+            <hr class="mb-4">
+
+            <!-- Invoice Details Card -->
+            <div class="card p-3 border mb-4 bg-light">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted">Invoice Ref:</span>
+                    <strong>{{ invoice.invoice_number }}</strong>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted">Job Ref:</span>
+                    <span>{{ invoice.job_number }}</span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-dark font-weight-bold">Total Amount Due:</span>
+                    <h4 class="mb-0 text-primary font-weight-bold">${{ "%.2f" | format(invoice.total) }}</h4>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('customer.pay_invoice', invoice_id=invoice._id) }}">
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Payment Amount ($)</label>
+                    <input type="number" name="amount" id="amount" class="form-control form-control-lg" step="0.01" min="1" max="{{ invoice.total }}" value="{{ invoice.total }}" required>
+                    <div class="form-text">You can make partial or full payments.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Select Payment Method</label>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="payment_method" id="pay_card" value="card" checked>
+                            <label class="btn btn-outline-secondary w-100 py-3 text-center" for="pay_card">
+                                <i class="bi bi-credit-card-2-front d-block mb-1" style="font-size: 20px;"></i> Card Payment
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="payment_method" id="pay_online" value="online">
+                            <label class="btn btn-outline-secondary w-100 py-3 text-center" for="pay_online">
+                                <i class="bi bi-globe d-block mb-1" style="font-size: 20px;"></i> Online Banking
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="payment_method" id="pay_transfer" value="bank_transfer">
+                            <label class="btn btn-outline-secondary w-100 py-3 text-center" for="pay_transfer">
+                                <i class="bi bi-bank d-block mb-1" style="font-size: 20px;"></i> Wire Transfer
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="payment_method" id="pay_cash" value="cash">
+                            <label class="btn btn-outline-secondary w-100 py-3 text-center" for="pay_cash">
+                                <i class="bi bi-cash d-block mb-1" style="font-size: 20px;"></i> Pay Cash
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('customer.dashboard') }}" class="btn btn-outline-secondary py-2 px-4">Cancel</a>
+                    <button type="submit" class="btn btn-success py-2 px-4">Authorize Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

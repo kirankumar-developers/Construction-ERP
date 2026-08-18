@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">User Management</h1>
+        <p class="text-muted">Manage system login accounts and roles permissions</p>
+    </div>
+    <a href="{{ url_for('users.add_user') }}" class="btn btn-primary"><i class="bi bi-person-plus"></i> Add User</a>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td><strong>{{ u.name }}</strong></td>
+                    <td>{{ u.email }}</td>
+                    <td><span class="badge bg-secondary">{{ u.role.upper().replace('_', ' ') }}</span></td>
+                    <td>
+                        <span class="badge bg-{% if u.is_active %}success{% else %}danger{% endif %}">
+                            {% if u.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ url_for('users.toggle_status', user_id=u._id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-{% if u.is_active %}danger{% else %}success{% endif %}">
+                                {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Log Expense - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Log Project Expense</h1>
+    <p class="text-muted">Enter structural or logistics cost receipts</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="table-card">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label for="project_id" class="form-label">Project</label>
+                        <select name="project_id" id="project_id" class="form-select" required>
+                            <option value="">Select Project</option>
+                            {% for p in projects %}
+                            <option value="{{ p._id }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="site_id" class="form-label">Site Assignment</label>
+                        <select name="site_id" id="site_id" class="form-select" required>
+                            <option value="">Select Site</option>
+                            {% for s in sites %}
+                            <option value="{{ s._id }}">{{ s.name }} ({{ s.site_code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="amount" class="form-label">Amount ($)</label>
+                        <input type="number" step="0.01" name="amount" id="amount" class="form-control" placeholder="0.00" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="expense_date" class="form-label">Expense Date</label>
+                        <input type="date" name="expense_date" id="expense_date" class="form-control" required>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="category" class="form-label">Expense Category</label>
+                        <select name="category" id="category" class="form-select" required>
+                            <option value="Material">Material</option>
+                            <option value="Labour">Labour</option>
+                            <option value="Equipment">Equipment</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Subcontractor">Subcontractor</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="description" class="form-label">Description / Remarks</label>
+                        <input type="text" name="description" id="description" class="form-control" placeholder="Concrete vendor delivery / supervisor cash payment" required>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="receipt" class="form-label">Upload Receipt Copy</label>
+                        <input type="file" name="receipt" id="receipt" class="form-control">
+                    </div>
+                    
+                    <div class="col-md-12 text-end mt-4">
+                        <a href="{{ url_for('expenses.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Process Expense</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

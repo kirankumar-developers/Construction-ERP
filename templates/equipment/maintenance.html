@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Machinery Maintenance - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Maintenance Log: {{ equipment.name }}</h1>
+        <p class="text-muted">Asset ID: <code>{{ equipment.equipment_id }}</code></p>
+    </div>
+    <a href="{{ url_for('equipment.index') }}" class="btn btn-outline-secondary">Back to Assets</a>
+</div>
+
+<div class="row g-4">
+    <!-- Log new maintenance -->
+    <div class="col-md-5">
+        <div class="table-card">
+            <h5 class="mb-3">Log Maintenance Service</h5>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="date" class="form-label">Service Date</label>
+                    <input type="date" name="date" id="date" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Service Details</label>
+                    <input type="text" name="description" id="description" class="form-control" placeholder="Hydraulic fluid change / Engine tuneup" required>
+                </div>
+                <div class="mb-3">
+                    <label for="cost" class="form-label">Maintenance Cost ($)</label>
+                    <input type="number" step="0.01" name="cost" id="cost" class="form-control" placeholder="0.00" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Record Service Log</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Maintenance history -->
+    <div class="col-md-7">
+        <div class="table-card">
+            <h5 class="mb-3">Maintenance Records History</h5>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td>{{ record.date }}</td>
+                            <td>{{ record.description }}</td>
+                            <td><strong>${{ "{:,.2f}".format(record.cost) }}</strong></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No maintenance records found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

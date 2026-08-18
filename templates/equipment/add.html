@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Add Equipment - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Register Equipment</h1>
+    <p class="text-muted">Enroll a new machine or tool in the company asset ledger</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="table-card">
+            <form method="POST" action="{{ url_for('equipment.add') }}">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label for="name" class="form-label">Equipment Name</label>
+                        <input type="text" name="name" id="name" class="form-control" placeholder="Excavator CAT 320D / Concrete Mixer" required>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="category" class="form-label">Equipment Category</label>
+                        <input type="text" name="category" id="category" class="form-control" placeholder="Excavator, Crane, Generator..." required>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="type" class="form-label">Acquisition Type</label>
+                        <select name="type" id="type" class="form-select" required>
+                            <option value="Purchase">Purchase (Owned)</option>
+                            <option value="Rental">Rental</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="daily_cost" class="form-label">Daily Cost Rate ($)</label>
+                        <input type="number" step="0.01" name="daily_cost" id="daily_cost" class="form-control" placeholder="0.00" required>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="project_id" class="form-label">Project Assignment</label>
+                        <select name="project_id" id="project_id" class="form-select" required>
+                            <option value="">Select Project</option>
+                            {% for p in projects %}
+                            <option value="{{ p._id }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="site_id" class="form-label">Site Assignment</label>
+                        <select name="site_id" id="site_id" class="form-select" required>
+                            <option value="">Select Site</option>
+                            {% for s in sites %}
+                            <option value="{{ s._id }}">{{ s.name }} ({{ s.site_code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12 text-end mt-4">
+                        <a href="{{ url_for('equipment.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Equipment</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

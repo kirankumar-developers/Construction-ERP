@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Add Material - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Register Material Item</h1>
+    <p class="text-muted">Add a new item definition to the master catalog</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="table-card">
+            <form method="POST" action="{{ url_for('materials.add') }}">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label for="material_code" class="form-label">Material Code (Unique)</label>
+                        <input type="text" name="material_code" id="material_code" class="form-control" placeholder="e.g. CMT-OPC53" required>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="name" class="form-label">Material Name</label>
+                        <input type="text" name="name" id="name" class="form-control" placeholder="e.g. Cement OPC Grade 53" required>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="category_id" class="form-label">Category</label>
+                        <select name="category_id" id="category_id" class="form-select" required>
+                            <option value="">Select Category</option>
+                            {% for c in categories %}
+                            <option value="{{ c._id }}">{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="unit" class="form-label">Unit of Measure</label>
+                        <input type="text" name="unit" id="unit" class="form-control" placeholder="e.g. Bags / Cum / Kg" value="Nos" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="min_stock_level" class="form-label">Minimum Stock Alert Level</label>
+                        <input type="number" step="0.01" name="min_stock_level" id="min_stock_level" class="form-control" value="10" required>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="purchase_rate" class="form-label">Default Purchase Rate ($)</label>
+                        <input type="number" step="0.01" name="purchase_rate" id="purchase_rate" class="form-control" value="0.00" required>
+                    </div>
+                    
+                    <div class="col-md-12 text-end mt-4">
+                        <a href="{{ url_for('materials.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Material</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

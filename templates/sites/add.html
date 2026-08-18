@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Add Site - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">Add Construction Site</h1>
+    <p class="text-muted">Register a new physical site under an active project</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="table-card">
+            <form method="POST" action="{{ url_for('sites.add') }}">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label for="name" class="form-label">Site Name</label>
+                        <input type="text" name="name" id="name" class="form-control" placeholder="Site Name / Block / Phase" required>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="project_id" class="form-label">Project Assignment</label>
+                        <select name="project_id" id="project_id" class="form-select" required>
+                            <option value="">Select Project</option>
+                            {% for p in projects %}
+                            <option value="{{ p._id }}">{{ p.name }} ({{ p.project_code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="address" class="form-label">Site Address</label>
+                        <input type="text" name="address" id="address" class="form-control" placeholder="Enter physical address">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="lat" class="form-label">Latitude</label>
+                        <input type="text" name="lat" id="lat" class="form-control" placeholder="0.0" readonly>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="lng" class="form-label">Longitude</label>
+                        <input type="text" name="lng" id="lng" class="form-control" placeholder="0.0" readonly>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="engineer_id" class="form-label">Site Engineer</label>
+                        <select name="engineer_id" id="engineer_id" class="form-select" required>
+                            <option value="">Select Site Engineer</option>
+                            {% for e in engineers %}
+                            <option value="{{ e._id }}">{{ e.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="supervisor_id" class="form-label">Supervisor</label>
+                        <select name="supervisor_id" id="supervisor_id" class="form-select">
+                            <option value="">Select Supervisor</option>
+                            {% for s in supervisors %}
+                            <option value="{{ s._id }}">{{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <div id="map" class="map-container-small"></div>
+                        <small class="text-muted">Click on the map to pin the site coordinates.</small>
+                    </div>
+                    
+                    <div class="col-md-12 text-end">
+                        <a href="{{ url_for('sites.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create Site</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var map = L.map('map').setView([20.5937, 78.9629], 5);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        
+        var marker;
+        
+        map.on('click', function(e) {
+            var lat = e.latlng.lat;
+            var lng = e.latlng.lng;
+            
+            document.getElementById('lat').value = lat.toFixed(6);
+            document.getElementById('lng').value = lng.toFixed(6);
+            
+            if (marker) {
+                marker.setLatLng(e.latlng);
+            } else {
+                marker = L.marker(e.latlng).addTo(map);
+            }
+        });
+    });
+</script>
+{% endblock %}

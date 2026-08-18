@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Quality Inspections - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Quality Audits & Inspections</h1>
+        <p class="text-muted">Monitor site safety checklists and compliance logs</p>
+    </div>
+    {% if session.role in ['super_admin', 'admin', 'project_manager', 'site_engineer'] %}
+    <a href="{{ url_for('quality.add') }}" class="btn btn-primary"><i class="bi bi-shield-plus"></i> Log Inspection Audit</a>
+    {% endif %}
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Project / Site</th>
+                    <th>Inspector</th>
+                    <th>Overall Audit Result</th>
+                    <th>Remarks</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ins in inspections %}
+                <tr>
+                    <td>{{ ins.inspection_date }}</td>
+                    <td>{{ ins.project_name }} / {{ ins.site_name }}</td>
+                    <td>{{ ins.inspector_name }}</td>
+                    <td>
+                        <span class="badge bg-{% if ins.result == 'approved' %}success{% else %}warning{% endif %}">
+                            {{ ins.result.upper() }}
+                        </span>
+                    </td>
+                    <td>{{ ins.remarks }}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#insCollapse_{{ ins._id }}">View Checkpoints</button>
+                    </td>
+                </tr>
+                <tr class="collapse-row">
+                    <td colspan="6" class="p-0 border-0">
+                        <div class="collapse" id="insCollapse_{{ ins._id }}">
+                            <div class="p-4 bg-light">
+                                <h6>Checklist Audited Items:</h6>
+                                <ul>
+                                    {% for check in ins.checklist %}
+                                    <li>
+                                        <strong>{{ check.item }}</strong> - 
+                                        <span class="text-{% if check.status == 'Pass' %}success{% else %}danger{% endif %}">{{ check.status }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% if ins.photos %}
+                                <h6>Verification Photo:</h6>
+                                <a href="{{ ins.photos[0] }}" target="_blank"><img src="{{ ins.photos[0] }}" class="img-thumbnail" style="width: 120px;"></a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">No quality inspections conducted.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Sites - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Construction Sites</h1>
+        <p class="text-muted">Manage locations, assign engineers and supervisors</p>
+    </div>
+    {% if session.role in ['super_admin', 'admin', 'project_manager'] %}
+    <a href="{{ url_for('sites.add') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Add Site</a>
+    {% endif %}
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Site Code</th>
+                    <th>Site Name</th>
+                    <th>Project Assignment</th>
+                    <th>Address</th>
+                    <th>Site Engineer</th>
+                    <th>Supervisor</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in sites %}
+                <tr>
+                    <td><code>{{ s.site_code }}</code></td>
+                    <td><strong>{{ s.name }}</strong></td>
+                    <td>{{ s.project_name }}</td>
+                    <td>{{ s.address }}</td>
+                    <td>{{ s.engineer_name }}</td>
+                    <td>{{ s.supervisor_name }}</td>
+                    <td>
+                        <span class="badge bg-{% if s.status == 'active' %}success{% else %}warning{% endif %}">
+                            {{ s.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if session.role in ['super_admin', 'admin', 'project_manager'] %}
+                        <a href="{{ url_for('sites.edit', site_id=s._id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        {% else %}
+                        <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No construction sites registered.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

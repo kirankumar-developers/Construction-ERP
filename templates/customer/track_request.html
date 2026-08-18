@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Track Service Request - OnsitePro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="m-0"><i class="bi bi-geo-alt me-2 text-primary"></i> Track Ticket #{{ (service_request._id | string)[-6:] }}</h3>
+                <a href="{{ url_for('customer.dashboard') }}" class="btn btn-outline-secondary btn-sm">Back to Portal</a>
+            </div>
+            <hr class="mt-0 mb-4">
+
+            <div class="card p-3 border mb-4 bg-light-subtle">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small text-uppercase">Ticket Title</label>
+                        <h5>{{ service_request.title }}</h5>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <label class="text-muted small text-uppercase">Category</label>
+                        <div><strong class="text-dark">{{ service_request.service_category }}</strong></div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <label class="text-muted small text-uppercase">Date Submitted</label>
+                        <div>{{ service_request.created_at | datetime }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Tracker Graphic -->
+            <div class="row text-center mb-4">
+                <div class="col-4">
+                    <div class="p-2 border rounded-3 bg-success-subtle text-success">
+                        <i class="bi bi-send-check" style="font-size: 24px;"></i>
+                        <div class="small font-weight-bold mt-1">Submitted</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    {% if service_request.status in ['approved', 'completed'] %}
+                        <div class="p-2 border rounded-3 bg-success-subtle text-success">
+                            <i class="bi bi-calendar-check" style="font-size: 24px;"></i>
+                            <div class="small font-weight-bold mt-1">Scheduled</div>
+                        </div>
+                    {% else %}
+                        <div class="p-2 border rounded-3 bg-light text-muted">
+                            <i class="bi bi-calendar-x" style="font-size: 24px;"></i>
+                            <div class="small font-weight-bold mt-1">Reviewing</div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-4">
+                    {% if service_request.status == 'completed' %}
+                        <div class="p-2 border rounded-3 bg-success-subtle text-success">
+                            <i class="bi bi-check-circle" style="font-size: 24px;"></i>
+                            <div class="small font-weight-bold mt-1">Completed</div>
+                        </div>
+                    {% else %}
+                        <div class="p-2 border rounded-3 bg-light text-muted">
+                            <i class="bi bi-check-circle" style="font-size: 24px;"></i>
+                            <div class="small font-weight-bold mt-1">Completed</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Job Execution Progress Details -->
+            {% if job %}
+                <div class="card p-4 border border-teal rounded-3 mb-4 bg-teal-subtle">
+                    <h5 class="text-teal-emphasis mb-3"><i class="bi bi-gear-fill me-2"></i> Active Work Order Details</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small">Job Reference Number</label>
+                            <h6>{{ job.job_number }}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Current Dispatch Status</label>
+                            <div>
+                                <span class="badge bg-secondary text-uppercase">{{ job.status }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="text-muted small">Service Location Address</label>
+                            <p class="mb-0 text-dark">{{ job.location.address }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info py-3 mb-4" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i> Our support staff is currently auditing this request. We will schedule a service technician shortly.
+                </div>
+            {% endif %}
+
+            <!-- Location Map -->
+            <h5 class="mb-3"><i class="bi bi-map me-2"></i> Dispatch Site Map</h5>
+            <div id="trackMap" class="map-container-small"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var lat = {{ service_request.location.lat or 12.9716 }};
+    var lng = {{ service_request.location.lng or 77.5946 }};
+    var map = initLeafletMap('trackMap', lat, lng, false);
+});
+</script>
+{% endblock %}

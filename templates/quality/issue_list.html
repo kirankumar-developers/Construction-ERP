@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Snags & Issues - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Snags & Site Issues</h1>
+        <p class="text-muted">Report, assign, and track completion of snag list items</p>
+    </div>
+    <a href="{{ url_for('issues.add') }}" class="btn btn-primary"><i class="bi bi-exclamation-octagon"></i> Report Snag</a>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Snag No</th>
+                    <th>Title</th>
+                    <th>Project / Site</th>
+                    <th>Priority</th>
+                    <th>Assigned To</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Action / Modify</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in issues %}
+                <tr>
+                    <td><code>{{ issue.issue_number }}</code></td>
+                    <td><strong>{{ issue.title }}</strong></td>
+                    <td>{{ issue.project_name }} / {{ issue.site_name }}</td>
+                    <td>
+                        <span class="badge bg-{% if issue.priority == 'critical' %}danger{% else %}warning text-dark{% endif %}">
+                            {{ issue.priority.upper() }}
+                        </span>
+                    </td>
+                    <td>{{ issue.assignee_name }}</td>
+                    <td>{{ issue.due_date }}</td>
+                    <td>
+                        <span class="badge bg-{% if issue.status == 'resolved' or issue.status == 'closed' %}success{% else %}danger{% endif %}">
+                            {{ issue.status.upper() }}
+                        </span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#issueCollapse_{{ issue._id }}">Details</button>
+                    </td>
+                </tr>
+                <tr class="collapse-row">
+                    <td colspan="8" class="p-0 border-0">
+                        <div class="collapse" id="issueCollapse_{{ issue._id }}">
+                            <div class="p-4 bg-light">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <h6>Scope Description:</h6>
+                                        <p>{{ issue.description or 'No details provided.' }}</p>
+                                        <p class="small text-muted">Reported By: {{ issue.reporter_name }} | Created at: {{ issue.created_at | datetime }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        {% if issue.photos %}
+                                        <h6>Snag Photo Proof:</h6>
+                                        <a href="{{ issue.photos[0] }}" target="_blank"><img src="{{ issue.photos[0] }}" class="img-thumbnail" style="width: 150px;"></a>
+                                        {% endif %}
+                                        
+                                        <div class="mt-3">
+                                            <h6>Update Snag State:</h6>
+                                            <form method="POST" action="{{ url_for('issues.update_status', issue_id=issue._id) }}" class="d-inline-flex gap-2">
+                                                <select name="status" class="form-select w-auto">
+                                                    {% for s in IssueStatus.ALL %}
+                                                    <option value="{{ s }}" {% if issue.status == s %}selected{% endif %}>{{ s.upper() }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <button type="submit" class="btn btn-primary btn-sm">Update Status</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No snag issues reported.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

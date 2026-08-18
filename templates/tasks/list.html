@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Tasks - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Task Management</h1>
+        <p class="text-muted">Monitor project activities and assignments</p>
+    </div>
+    {% if session.role in ['super_admin', 'admin', 'project_manager', 'site_engineer'] %}
+    <a href="{{ url_for('tasks.add') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create Task</a>
+    {% endif %}
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Task Title</th>
+                    <th>Project</th>
+                    <th>Site</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tasks %}
+                <tr>
+                    <td><strong>{{ t.title }}</strong></td>
+                    <td>{{ t.project_name }}</td>
+                    <td>{{ t.site_name }}</td>
+                    <td>
+                        <span class="badge bg-{% if t.priority == 'critical' %}danger{% elif t.priority == 'high' %}warning text-dark{% else %}secondary{% endif %}">
+                            {{ t.priority.upper() }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if t.status == 'completed' %}success{% elif t.status == 'delayed' %}danger{% else %}info{% endif %}">
+                            {{ t.status.upper().replace('_', ' ') }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="progress me-2 flex-grow-1" style="height: 6px; width: 60px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ t.progress }}%"></div>
+                            </div>
+                            <span>{{ t.progress }}%</span>
+                        </div>
+                    </td>
+                    <td>{{ t.due_date }}</td>
+                    <td>
+                        <a href="{{ url_for('tasks.view', task_id=t._id) }}" class="btn btn-sm btn-outline-primary">Details</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No tasks found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

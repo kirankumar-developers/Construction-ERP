@@ -1,0 +1,47 @@
+# Onsite Service Management System Tasks
+
+- [x] Project Setup & Config files
+  - [x] `requirements.txt`
+  - [x] `.env.example` & `.env`
+  - [x] `config.py`
+  - [x] `app.py`
+- [x] Database Connection & Indexes
+  - [x] `database/mongodb.py`
+  - [x] `database/indexes.py`
+- [x] Utilities & Decorators
+  - [x] `utils/constants.py`
+  - [x] `utils/decorators.py`
+  - [x] `utils/validators.py`
+  - [x] `utils/helpers.py`
+- [x] Core Services
+  - [x] `services/auth_service.py`
+  - [x] `services/upload_service.py`
+  - [x] `services/notification_service.py`
+  - [x] `services/email_service.py`
+  - [x] `services/job_service.py`
+  - [x] `services/attendance_service.py`
+  - [x] `services/invoice_service.py`
+- [x] Controller Routes
+  - [x] `routes/auth.py`
+  - [x] `routes/admin.py`
+  - [x] `routes/employee.py`
+  - [x] `routes/customer.py`
+  - [x] `routes/jobs.py`
+  - [x] `routes/attendance.py`
+  - [x] `routes/invoices.py`
+  - [x] `routes/reports.py`
+- [x] Templates & Static Files
+  - [x] Static styling (`static/css/styles.css`, `static/js/main.js`)
+  - [x] Common layouts (`templates/base.html`, `templates/errors/403.html`, `templates/errors/404.html`)
+  - [x] Auth templates (`templates/auth/login.html`, `templates/auth/register.html`)
+  - [x] Customer templates (`templates/customer/dashboard.html`, `templates/customer/create_request.html`, `templates/customer/track_request.html`)
+  - [x] Employee templates (`templates/employee/dashboard.html`, `templates/employee/job_detail.html`, `templates/employee/history.html`)
+  - [x] Admin templates (`templates/admin/dashboard.html`, `templates/admin/employees.html`, `templates/admin/customers.html`, `templates/admin/reports.html`)
+  - [x] Job management templates (`templates/jobs/list.html`, `templates/jobs/detail.html`, `templates/jobs/edit.html`)
+  - [x] Invoice management templates (`templates/invoices/list.html`, `templates/invoices/detail.html`, `templates/invoices/create.html`)
+- [x] Seeding & Readme
+  - [x] `seed.py`
+  - [x] `README.md`
+- [x] Verification & Demo
+  - [x] Seed database
+  - [x] Verify functionality

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Client Portal - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Client Portal</h1>
+        <p class="text-muted">Welcome, {{ session.name }} ({{ client.company_name if client else '' }})</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-primary">
+                <i class="bi bi-building"></i>
+            </div>
+            <div class="text-muted">My Projects</div>
+            <h3 class="mb-0">{{ projects | length }}</h3>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-success">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="text-muted">Total Paid</div>
+            <h3 class="mb-0">${{ "{:,.2f}".format(total_paid) }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-danger">
+                <i class="bi bi-credit-card"></i>
+            </div>
+            <div class="text-muted">Outstanding Balance</div>
+            <h3 class="mb-0">${{ "{:,.2f}".format(outstanding) }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="table-card">
+            <h5 class="mb-4">My Invoices</h5>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Invoice Number</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inv in invoices %}
+                        <tr>
+                            <td><code>{{ inv.invoice_number }}</code></td>
+                            <td>${{ "{:,.2f}".format(inv.total_amount) }}</td>
+                            <td><span class="badge bg-{% if inv.status == 'paid' %}success{% else %}warning{% endif %}">{{ inv.status }}</span></td>
+                            <td><a href="{{ url_for('invoices.view', invoice_id=inv._id) }}" class="btn btn-sm btn-outline-primary">Print / PDF</a></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No invoices found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h5 class="mb-4">Contact Project Desk</h5>
+            <p class="text-muted small">Reach out to the Site Managers directly for any design edits or reports.</p>
+            <hr>
+            <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-envelope text-primary me-2"></i>
+                <span>support@constructionerp.com</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

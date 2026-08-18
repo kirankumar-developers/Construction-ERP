@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Create Service Job - OnsitePro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h3 class="mb-2"><i class="bi bi-plus-circle me-2 text-primary"></i> Create Service Job</h3>
+            <p class="text-muted">Fill in service details to schedule an onsite work ticket.</p>
+            <hr class="mt-0 mb-4">
+
+            <form method="POST" action="{{ url_for('jobs.create', request_id=request_item._id | string if request_item else '') }}">
+                <!-- Customer Selection -->
+                <div class="mb-3">
+                    <label for="customer_id" class="form-label font-weight-bold">Select Customer</label>
+                    {% if request_item %}
+                        <select name="customer_id" id="customer_id" class="form-select" required>
+                            <option value="{{ request_item.customer_id }}" selected>
+                                {{ request_item.customer_name }} (Submitted Request)
+                            </option>
+                        </select>
+                    {% else %}
+                        <select name="customer_id" id="customer_id" class="form-select" required>
+                            <option value="" disabled selected>Choose a customer...</option>
+                            {% for cust in customers %}
+                                <option value="{{ cust._id }}">{{ cust.customer_name }} ({{ cust.email }})</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
+                </div>
+
+                <!-- Job Title -->
+                <div class="mb-3">
+                    <label for="title" class="form-label font-weight-bold">Job Subject / Title</label>
+                    <input type="text" name="title" id="title" class="form-control" 
+                           value="{{ request_item.title if request_item else '' }}" 
+                           placeholder="e.g. Faulty boiler element replacement" required>
+                </div>
+
+                <!-- Date configurations -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="scheduled_date" class="form-label">Scheduled Date</label>
+                        <input type="datetime-local" name="scheduled_date" id="scheduled_date" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="due_date" class="form-label">Due Date</label>
+                        <input type="datetime-local" name="due_date" id="due_date" class="form-control" required>
+                    </div>
+                </div>
+
+                <!-- Priority & Description -->
+                <div class="row mb-3">
+                    <div class="col-md-12 mb-3">
+                        <label for="priority" class="form-label">Job Priority</label>
+                        <select name="priority" id="priority" class="form-select">
+                            <option value="low" {% if request_item and request_item.priority == 'low' %}selected{% endif %}>Low</option>
+                            <option value="medium" {% if not request_item or request_item.priority == 'medium' %}selected{% endif %}>Medium</option>
+                            <option value="high" {% if request_item and request_item.priority == 'high' %}selected{% endif %}>High</option>
+                            <option value="urgent" {% if request_item and request_item.priority == 'urgent' %}selected{% endif %}>Urgent</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="description" class="form-label">Detailed Work Scope Description</label>
+                        <textarea name="description" id="description" class="form-control" rows="4" placeholder="Detail tasks, materials required, and instructions..." required>{{ request_item.description if request_item else '' }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Geolocation Search OSM Map -->
+                <div class="mb-3">
+                    <label class="form-label">Job Site Location</label>
+                    <p class="text-muted small mb-2"><i class="bi bi-info-circle"></i> Point exact coordinates on the map, address details updates automatically.</p>
+                    
+                    <div id="jobCreateMap" class="map-container-small mb-3"></div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <input type="text" name="address" id="address" class="form-control" 
+                                   value="{{ request_item.location.address if request_item else '' }}" 
+                                   placeholder="Street Address, City" required>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <input type="text" name="lat" id="lat" class="form-control" readonly placeholder="Latitude">
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <input type="text" name="lng" id="lng" class="form-control" readonly placeholder="Longitude">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('jobs.list_jobs') }}" class="btn btn-outline-secondary py-2 px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary py-2 px-4">Create Job Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var lat = {{ request_item.location.lat if request_item else 32.7767 }};
+    var lng = {{ request_item.location.lng if request_item else -96.7970 }};
+    var address = "{{ request_item.location.address if request_item else 'Dallas, TX, USA' }}";
+    
+    var map = initLeafletMap('jobCreateMap', lat, lng, true, '');
+    
+    document.getElementById('lat').value = lat.toFixed(6);
+    document.getElementById('lng').value = lng.toFixed(6);
+    document.getElementById('address').value = address;
+});
+</script>
+{% endblock %}

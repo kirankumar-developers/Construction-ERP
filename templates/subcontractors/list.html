@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Subcontractors - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Subcontractors Registry</h1>
+        <p class="text-muted">Manage subcontractor details and work orders</p>
+    </div>
+    <a href="{{ url_for('subcontractors.work_orders') }}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-text"></i> Work Orders list</a>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Company Name</th>
+                    <th>Contact Person</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Work Category</th>
+                    <th>Contract Value</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in subcontractors %}
+                <tr>
+                    <td><strong>{{ sub.company_name }}</strong></td>
+                    <td>{{ sub.contact_person }}</td>
+                    <td>{{ sub.email }}</td>
+                    <td>{{ sub.phone }}</td>
+                    <td><span class="badge bg-secondary">{{ sub.work_category }}</span></td>
+                    <td><strong>${{ "{:,.2f}".format(sub.contract_value) }}</strong></td>
+                    <td>
+                        <a href="{{ url_for('subcontractors.view', sub_id=sub._id) }}" class="btn btn-sm btn-outline-primary">Profile Details</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">No subcontractors registered.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

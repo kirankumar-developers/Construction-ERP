@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Employee Dashboard - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Employee Dashboard</h1>
+        <p class="text-muted">Welcome, {{ session.name }}</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-warning">
+                <i class="bi bi-list-task"></i>
+            </div>
+            <div class="text-muted">Pending Tasks</div>
+            <h3 class="mb-0">{{ pending_tasks_count }}</h3>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-success">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="text-muted">Completed Tasks</div>
+            <h3 class="mb-0">{{ completed_tasks_count }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon-wrapper icon-primary">
+                <i class="bi bi-clock"></i>
+            </div>
+            <div class="text-muted">Today's Attendance</div>
+            <h3 class="mb-0">
+                {% if attendance_today %}
+                    {% if attendance_today.check_out_time %}
+                        Checked Out
+                    {% else %}
+                        Checked In
+                    {% endif %}
+                {% else %}
+                    Not Checked In
+                {% endif %}
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="table-card">
+            <h5 class="mb-4">My Assigned Tasks</h5>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Task Title</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in assigned_tasks %}
+                        <tr>
+                            <td><strong>{{ t.title }}</strong></td>
+                            <td><span class="badge bg-warning text-dark">{{ t.priority }}</span></td>
+                            <td><span class="badge bg-info">{{ t.status }}</span></td>
+                            <td>{{ t.due_date }}</td>
+                            <td><a href="{{ url_for('tasks.view', task_id=t._id) }}" class="btn btn-sm btn-outline-primary">View Task</a></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No tasks assigned to you.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h5 class="mb-4">Quick Attendance Check-In</h5>
+            <p class="text-muted small">Please verify location permission on your browser before clicking Check-In.</p>
+            <a href="{{ url_for('attendance.index') }}" class="btn btn-primary w-100 p-3"><i class="bi bi-geo-alt"></i> Open Attendance Logs</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

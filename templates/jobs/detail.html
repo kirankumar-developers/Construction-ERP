@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Job Detail #{{ job.job_number }} - OnsitePro{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <h2 class="m-0">Job Reference: {{ job.job_number }}</h2>
+        <p class="text-muted m-0">Admin view of dispatch ticket status and worker logs.</p>
+    </div>
+    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <a href="{{ url_for('jobs.list_jobs') }}" class="btn btn-outline-secondary btn-sm">Back to Tickets</a>
+        <a href="{{ url_for('jobs.edit', job_id=job._id) }}" class="btn btn-outline-primary btn-sm ms-2"><i class="bi bi-pencil"></i> Edit Details</a>
+        {% if job.status == 'completed' %}
+            <a href="{{ url_for('invoices.create', job_id=job._id) }}" class="btn btn-success btn-sm ms-2"><i class="bi bi-receipt"></i> Generate Invoice</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Specs & Logs -->
+    <div class="col-lg-8 mb-4">
+        <!-- Job Details Core -->
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-file-earmark-text me-2 text-primary"></i> Service Details</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="text-muted small">Job Subject / Title</label>
+                    <h5 class="text-dark font-weight-bold">{{ job.title }}</h5>
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="text-muted small">Priority</label>
+                    <div>
+                        {% if job.priority == 'urgent' %}
+                            <span class="badge bg-danger text-uppercase">Urgent</span>
+                        {% elif job.priority == 'high' %}
+                            <span class="badge bg-warning text-dark text-uppercase">High</span>
+                        {% else %}
+                            <span class="badge bg-info text-dark text-uppercase">{{ job.priority }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="text-muted small">Current status</label>
+                    <div>
+                        <span class="badge bg-secondary text-uppercase">{{ job.status }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6 col-6">
+                    <label class="text-muted small">Scheduled Time</label>
+                    <div><strong>{{ job.scheduled_date | datetime }}</strong></div>
+                </div>
+                <div class="col-md-6 col-6">
+                    <label class="text-muted small">Target Due Date</label>
+                    <div><strong>{{ job.due_date | datetime }}</strong></div>
+                </div>
+                <div class="col-md-12">
+                    <label class="text-muted small">Service Description</label>
+                    <p class="text-dark-emphasis mt-1 mb-0" style="white-space: pre-wrap;">{{ job.description }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Log -->
+        <div class="card border-0 shadow-sm p-4">
+            <h5 class="mb-4"><i class="bi bi-clock me-2 text-secondary"></i> Work Progress Logs & History</h5>
+            {% if job.updates %}
+                <div class="timeline" style="border-left: 2px solid var(--border-color); padding-left: 20px; margin-left: 10px;">
+                    {% for up in job.updates %}
+                        <div class="position-relative mb-4">
+                            <div class="position-absolute rounded-circle bg-white border border-primary" style="width: 12px; height: 12px; left: -27px; top: 6px;"></div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="font-weight-bold text-dark">{{ up.by_name }} updated status to <span class="badge bg-light text-dark border">{{ up.status.upper() }}</span></span>
+                                <small class="text-muted">{{ up.updated_at | datetime }}</small>
+                            </div>
+                            {% if up.notes %}
+                                <p class="text-muted mt-2 mb-2 p-2 border bg-light-subtle rounded small">{{ up.notes }}</p>
+                            {% endif %}
+                            
+                            {% if up.attachments %}
+                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                    {% for att in up.attachments %}
+                                        <a href="{{ att.url }}" target="_blank" class="btn btn-sm btn-outline-secondary py-1 px-2 text-truncate" style="max-width: 200px;">
+                                            <i class="bi bi-paperclip"></i> {{ att.filename }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-muted">No worker check-ins or progress reports submitted yet.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Assignments & maps -->
+    <div class="col-lg-4">
+        <!-- Customer details -->
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-person me-2 text-primary"></i> Customer</h5>
+            <h6 class="font-weight-bold text-dark mb-1">{{ job.customer_name }}</h6>
+            <p class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> {{ job.customer_address }}</p>
+            <p class="text-muted small mb-0"><i class="bi bi-telephone"></i> {{ job.customer_phone }}</p>
+            <p class="text-muted small mb-0"><i class="bi bi-envelope"></i> {{ job.customer_email }}</p>
+        </div>
+
+        <!-- Mapping location -->
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-map me-2 text-danger"></i> Dispatch Location Map</h5>
+            <div id="jobAdminMap" class="map-container-small mb-3"></div>
+            <p class="text-muted small mb-0"><i class="bi bi-geo-alt"></i> Lat/Lng: {{ job.location.lat }}, {{ job.location.lng }}</p>
+        </div>
+
+        <!-- Employee Assignment Console -->
+        <div class="card border-0 shadow-sm p-4">
+            <h5 class="mb-3"><i class="bi bi-person-gear me-2 text-info"></i> Dispatch Assignment</h5>
+            {% if job.employee_name %}
+                <div class="p-3 border rounded mb-3">
+                    <label class="text-muted small">Assigned Worker</label>
+                    <h6 class="font-weight-bold text-dark mb-1">{{ job.employee_name }}</h6>
+                    <small class="text-muted d-block">ID: {{ job.employee_id_val }}</small>
+                    <small class="text-muted d-block">Phone: {{ job.employee_phone }}</small>
+                    <hr class="my-2">
+                    <span class="badge bg-secondary-subtle text-secondary text-uppercase">{{ job.assignment.assignment_status }}</span>
+                </div>
+            {% else %}
+                <div class="alert alert-warning py-2 mb-3" style="font-size: 13px;">
+                    <i class="bi bi-exclamation-triangle"></i> This job has not been dispatched to a field tech yet.
+                </div>
+            {% endif %}
+
+            <!-- Form to re-assign or assign -->
+            <form method="POST" action="{{ url_for('jobs.assign', job_id=job._id) }}">
+                <div class="mb-3">
+                    <label for="employee_id" class="form-label small">Select Technician</label>
+                    <select name="employee_id" id="employee_id" class="form-select" required>
+                        <option value="" disabled selected>Select Staff</option>
+                        {% for emp in employees %}
+                            <option value="{{ emp._id }}" {% if job.employee_obj_id == emp._id | string %}selected{% endif %}>
+                                {{ emp.name }} ({{ emp.department }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                    {% if job.employee_name %}Re-Dispatch Tech{% else %}Dispatch Technician{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var lat = {{ job.location.lat or 12.9716 }};
+    var lng = {{ job.location.lng or 77.5946 }};
+    var map = initLeafletMap('jobAdminMap', lat, lng, false);
+});
+</script>
+{% endblock %}

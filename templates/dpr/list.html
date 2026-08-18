@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}DPR Reports - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Daily Progress Reports (DPR)</h1>
+        <p class="text-muted">Review daily work updates and resource logs</p>
+    </div>
+    {% if session.role in ['super_admin', 'admin', 'site_engineer', 'supervisor'] %}
+    <a href="{{ url_for('dpr.add') }}" class="btn btn-primary"><i class="bi bi-file-earmark-plus"></i> Submit DPR</a>
+    {% endif %}
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Project</th>
+                    <th>Site</th>
+                    <th>Labour Count</th>
+                    <th>Weather</th>
+                    <th>Submitted By</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in dprs %}
+                <tr>
+                    <td><strong>{{ d.date }}</strong></td>
+                    <td>{{ d.project_name }}</td>
+                    <td>{{ d.site_name }}</td>
+                    <td>{{ d.labour_details.total }} Workers</td>
+                    <td>{{ d.weather }}</td>
+                    <td>{{ d.submitted_by_name }}</td>
+                    <td>
+                        <span class="badge bg-{% if d.status == 'approved' %}success{% elif d.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                            {{ d.status.upper() }}
+                        </span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#dprCollapse_{{ d._id }}">View Report Details</button>
+                    </td>
+                </tr>
+                <!-- Collapse Details -->
+                <tr class="collapse-row">
+                    <td colspan="8" class="p-0 border-0">
+                        <div class="collapse" id="dprCollapse_{{ d._id }}">
+                            <div class="p-4 bg-light">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <h6>Work Completed:</h6>
+                                        <p>{{ d.work_completed or 'N/A' }}</p>
+                                        <h6>Work in Progress:</h6>
+                                        <p>{{ d.work_in_progress or 'N/A' }}</p>
+                                        <h6>Issues Reported:</h6>
+                                        <p class="text-danger">{{ d.issues or 'None' }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Resources Consumed:</h6>
+                                        <ul>
+                                            <li>Materials: {% for m in d.material_used %}{{ m.name }} ({{ m.quantity }}), {% else %}None{% endfor %}</li>
+                                            <li>Equipment: {% for eq in d.equipment_used %}{{ eq.name }} ({{ eq.hours }} hrs), {% else %}None{% endfor %}</li>
+                                            <li>Weather: {{ d.weather }} | Delays: {{ d.delays or 'None' }}</li>
+                                        </ul>
+                                        {% if d.photos %}
+                                        <h6>Attached Photos:</h6>
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            {% for ph in d.photos %}
+                                            <a href="{{ ph }}" target="_blank"><img src="{{ ph }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;"></a>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if d.status == 'pending' and session.role in ['super_admin', 'admin', 'project_manager'] %}
+                                    <div class="col-12 border-top pt-3 text-end">
+                                        <form method="POST" action="{{ url_for('dpr.review', dpr_id=d._id) }}" class="d-inline">
+                                            <input type="text" name="review_remarks" class="form-control d-inline-block me-2" style="width: 250px;" placeholder="Review comments (optional)">
+                                            <button type="submit" name="action" value="approve" class="btn btn-sm btn-success me-2">Approve</button>
+                                            <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
+                                        </form>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No DPR logs found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Purchase Orders - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Purchase Orders (PO)</h1>
+        <p class="text-muted">Issue and review material supply orders</p>
+    </div>
+    <a href="{{ url_for('procurement.index') }}" class="btn btn-outline-secondary">Back to Requisitions</a>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>PO Number</th>
+                    <th>Vendor Supplier</th>
+                    <th>Project Target</th>
+                    <th>Total Cost (incl. tax)</th>
+                    <th>Delivery Deadline</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pos %}
+                <tr>
+                    <td><code>{{ p.po_number }}</code></td>
+                    <td><strong>{{ p.vendor_name }}</strong></td>
+                    <td>{{ p.project_name }}</td>
+                    <td><strong>${{ "{:,.2f}".format(p.total_amount) }}</strong></td>
+                    <td>{{ p.delivery_date }}</td>
+                    <td>
+                        <span class="badge bg-{% if p.status == 'approved' %}success{% elif p.status == 'delivered' %}secondary{% else %}warning{% endif %}">
+                            {{ p.status.upper() }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if p.status == 'pending' and session.role in ['super_admin', 'admin', 'project_manager'] %}
+                        <form method="POST" action="{{ url_for('procurement.approve_po', po_id=p._id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-success">Approve PO</button>
+                        </form>
+                        {% elif p.status == 'approved' and session.role in ['super_admin', 'admin', 'site_engineer'] %}
+                        <a href="{{ url_for('procurement.create_grn', po_id=p._id) }}" class="btn btn-sm btn-outline-warning">Record GRN Delivery</a>
+                        {% else %}
+                        <span class="text-muted">No Actions</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">No Purchase Orders issued.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

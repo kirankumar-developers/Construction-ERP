@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}System Alerts - Construction ERP{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3">System Notifications</h1>
+    <p class="text-muted">In-app notifications and alerts feed</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="table-card">
+            <h5 class="mb-4">Recent Alerts</h5>
+            <div class="list-group list-group-flush">
+                {% for notif in notifications %}
+                <div class="list-group-item py-3 px-0 d-flex justify-content-between align-items-start {% if not notif.is_read %}bg-light-subtle{% endif %}">
+                    <div class="me-auto">
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="badge bg-primary me-2">{{ notif.type.replace('_', ' ').upper() }}</span>
+                            <h6 class="mb-0"><strong>{{ notif.title }}</strong></h6>
+                        </div>
+                        <p class="mb-1 text-dark">{{ notif.message }}</p>
+                        <small class="text-muted">{{ notif.created_at | datetime }}</small>
+                    </div>
+                    {% if notif.link %}
+                    <a href="{{ notif.link }}" class="btn btn-sm btn-outline-primary ms-3">View Details</a>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-bell-slash fs-1 d-block mb-3"></i>
+                    No notifications in your feed.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
